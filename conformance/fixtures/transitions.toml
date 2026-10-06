@@ -1,0 +1,20 @@
+version = 1
+[profiles.a]
+unset_env = ["DROP"]
+[profiles.a.git]
+name = "Sample A"
+email = "a@example.test"
+[profiles.a.env]
+EMPTY = "a"
+PRESENT = "a"
+A_ONLY = "a"
+[profiles.b.git]
+name = "Sample B"
+email = "b@example.test"
+[profiles.b.env]
+PRESENT = "b"
+B_ONLY = "b"
+[profiles.c.env]
+C_ONLY = "c"
+[profiles.plain.env]
+PLAIN = "plain"

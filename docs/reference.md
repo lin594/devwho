@@ -4,7 +4,7 @@
 
 Use this page to look up a setting or precise behavior. For your first setup, start with [Getting started](getting-started.md).
 
-This describes the **implemented compatibility core**, currently written in Python. The [native environment convention](../spec/environment-v1.md) is a separate draft; planned [full core ports](../implementations/README.md) must preserve the commands and configuration below.
+This describes the shared behavior implemented by the Python, Go, Rust, and Bash compatibility cores. Choose one [core implementation](../implementations/README.md). The [native environment convention](../spec/environment-v1.md) is a separate draft; the repository includes a reference consumer example but does not claim third-party adoption.
 
 ## Commands
 
@@ -16,13 +16,18 @@ This describes the **implemented compatibility core**, currently written in Pyth
 | `devwho doctor [PROFILE] [--offline]` | Compare actual tool identity with the profile. |
 | `devwho exec PROFILE -- COMMAND ...` | Give one command and its descendants a profile. |
 | `devwho config path` | Print the selected config file path. |
-| `devwho config init` | Create a private example config; refuse to overwrite. |
+| `devwho config init` | Create a private TOML example config; refuse to overwrite. Unavailable in dotenv mode. |
+| `devwho config export-env PROFILE` | Export generic environment values to literal dotenv; refuse lossy conversion. |
 | `devwho init bash` / `devwho init zsh` | Print integration to evaluate in the current shell. |
 | `setdev PROFILE` | Activate a profile in an initialized shell. |
 | `setdev` | Activate `settings.shortcut_profile`, if configured. |
 | `unsetdev` | Restore this shell’s original baseline. |
 
 Use `devwho --config /absolute/path/config.toml COMMAND` to choose a different file for a command.
+
+## Explicit dotenv input
+
+Use `--env-file PATH [--env-profile NAME]` instead of `--config` to select the optional literal dotenv format. The file must select one profile with `DEVWHO_PROFILE`, or the caller must provide `--env-profile`; if both are present, they must match. Values are data: files are never sourced, interpolated, or merged with TOML. `config export-env PROFILE` exports only generic environment values and refuses profiles containing Git, SSH, GitHub, or explicit unset settings. See the [dotenv v1 contract](../spec/dotenv-v1.md) for grammar and limits.
 
 ## Profiles
 

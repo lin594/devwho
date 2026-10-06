@@ -3,12 +3,13 @@
 import json
 import os
 from pathlib import Path
+import shlex
 import subprocess
-import sys
 import tempfile
 import unittest
 
 ROOT = Path(__file__).resolve().parent.parent
+DEVWHO = Path(os.environ.get("DEVWHO_TEST_EXECUTABLE", ROOT / "bin" / "devwho")).resolve()
 
 
 class GitSSHTests(unittest.TestCase):
@@ -20,12 +21,9 @@ class GitSSHTests(unittest.TestCase):
             identity.write_text("dummy fixture; not a private key")
             fake_bin = home / "bin"
             fake_bin.mkdir()
-            log = home / "ssh-argv.json"
+            log = home / "ssh-argv.nul"
             (fake_bin / "ssh").write_text(
-                "#!" + sys.executable + "\n"
-                "import json,sys\nfrom pathlib import Path\n"
-                f"Path({str(log)!r}).write_text(json.dumps(sys.argv[1:]))\n"
-                "raise SystemExit(1)\n"
+                "#!/bin/sh\nprintf '%s\\0' \"$@\" > " + shlex.quote(str(log)) + "\nexit 1\n"
             )
             (fake_bin / "ssh").chmod(0o700)
             config = home / "config.toml"
@@ -48,8 +46,7 @@ class GitSSHTests(unittest.TestCase):
             )
             result = subprocess.run(
                 [
-                    sys.executable,
-                    str(ROOT / "bin" / "devwho"),
+                    str(DEVWHO),
                     "--config",
                     str(config),
                     "exec",
@@ -67,7 +64,7 @@ class GitSSHTests(unittest.TestCase):
             )
             self.assertNotEqual(result.returncode, 0)  # The mock never serves a remote.
             self.assertTrue(log.is_file(), result.stderr)
-            argv = json.loads(log.read_text())
+            argv = log.read_bytes().decode().rstrip("\0").split("\0")
             self.assertEqual(argv[argv.index("-i") + 1], str(identity))
             self.assertIn("IdentitiesOnly=yes", argv)
             self.assertIn("git@example.invalid", argv)

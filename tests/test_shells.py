@@ -17,7 +17,7 @@ import unittest
 
 
 REPO = Path(__file__).resolve().parents[1]
-DEVWHO = REPO / "bin" / "devwho"
+DEVWHO = Path(os.environ.get("DEVWHO_TEST_EXECUTABLE", REPO / "bin" / "devwho")).resolve()
 SHELLS = ("bash", "zsh")
 SHELL_EXES = {
     name: os.environ.get("DEVWHO_TEST_" + name.upper())
@@ -59,6 +59,9 @@ class ShellCase(unittest.TestCase):
         self.xdg.mkdir()
         self.config = self.root / "devwho.toml"
         self.write_config()
+        self.launchers = self.root / "launchers"
+        self.launchers.mkdir()
+        (self.launchers / "devwho").symlink_to(DEVWHO)
         self.repo = self.root / "repo"
         self.repo.mkdir()
         self.git(["init", "-q", "-b", "main"], cwd=self.repo)
@@ -72,7 +75,7 @@ class ShellCase(unittest.TestCase):
                 "DEVWHO_CONFIG": str(self.config),
                 "GIT_CONFIG_NOSYSTEM": "1",
                 "GIT_CONFIG_GLOBAL": os.devnull,
-                "PATH": str(REPO / "bin") + os.pathsep + os.environ.get("PATH", ""),
+                "PATH": str(self.launchers) + os.pathsep + os.environ.get("PATH", ""),
             }
         )
 
@@ -83,7 +86,11 @@ class ShellCase(unittest.TestCase):
     def clean_env():
         env = dict(os.environ)
         for key in list(env):
-            if key.startswith(("DEVWHO_", "GIT_CONFIG_")) or key in TRACKED_ENV:
+            if (
+                key.startswith(("DEVWHO_", "__DEVWHO", "GIT_"))
+                or key in TRACKED_ENV
+                or key in {"GH_TOKEN", "GITHUB_TOKEN", "GH_HOST", "ZDOTDIR", "BASH_ENV", "ENV"}
+            ):
                 env.pop(key, None)
         return env
 

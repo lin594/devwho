@@ -9,7 +9,7 @@
 - **发现问题？** 先查看[已有问题](https://github.com/lin594/devwho/issues)。如果还没人报告，请新建 issue，说明你原本预期的结果、实际发生的情况，以及简短的复现方法。请使用虚构身份信息，并删除令牌、私人路径等敏感内容。
 - **想改进文档？** 修改相关的 Markdown 页面或示例，然后提交拉取请求。只改文档时，请检查链接是否有效，命令和配置示例是否准确。无需为了文字改动而机械地增加测试。
 - **想修改代码？** 从一个明确的问题开始，或在拉取请求中说明要解决什么。行为变化应补充或更新测试，尤其是涉及 shell 切换、Git 身份和子进程执行时。
-- **想用 Go、Rust 或 Bash 实现完整 core？** 请查看[实现任务](implementations/README.zh-CN.md)和[共同兼容性要求](spec/compatibility-core-v1.zh-CN.md)。三者都是 Python core 的完整替代实现，使用相同的配置和命令，运行时不依赖 Python。包装器或 SDK 不算完成一个移植。
+- **想参与 core 开发？** Python、Go、Rust、Bash 实现共用[兼容契约](spec/compatibility-core-v1.zh-CN.md)和[可执行一致性测试套件](conformance/README.zh-CN.md)。构建要求和验证记录见[实现指南](implementations/README.zh-CN.md)。Go/Rust 运行时不依赖 Python/编译器；Bash 需要 jq 和 Perl。可选的 [Go 配置前端](docs/zh-CN/configuration-ui.md)与运行时 core 行为分开维护。
 - **想让应用原生支持？** 请先讨论[环境约定草案](spec/environment-v1.zh-CN.md)。应用用自身语言读取统一环境变量，无需依赖 DevWho 库或 core 的配置解析器。
 
 ## 开发现有 Python core

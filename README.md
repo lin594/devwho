@@ -25,11 +25,11 @@ If Git's directory-based `includeIf` already solves your problem, you may not ne
 
 The goal is to choose a context once and have applications use it, much like applications read proxy environment variables. Native applications would read `DEVWHO_PROFILE` and map the context to their own accounts. They would not need a Python module, a version variable, or a separate DevWho variable for every application. This [environment convention](spec/environment-v1.md) is currently a **draft**.
 
-Today, a **compatibility core** makes existing tools work by translating profiles into Git runtime configuration, `GH_CONFIG_DIR`, and other existing interfaces. Python is the first implementation. Complete Go, Rust, and Bash implementations are planned so users can choose one core that fits their machine, including machines without Python.
+Today, a **compatibility core** makes existing tools work by translating profiles into Git runtime configuration, `GH_CONFIG_DIR`, and other existing interfaces. Independent Python, Go, Rust, and Bash implementations share the same switching contract. Choose one core that fits your machine; Go and Rust binaries run without Python or a compiler.
 
 [How the ecosystem fits together](docs/ecosystem.md) · [Implementation status and roadmap](implementations/README.md)
 
-The runtime convention is independent of file formats. The current core reads TOML; a simple dotenv input is [proposed](docs/configuration-formats.md) alongside it. Native applications need only the resulting environment, not the producer's files.
+The runtime convention is independent of file formats. All four cores read complete TOML profiles and optional [literal dotenv input](docs/configuration-formats.md). An optional [configuration frontend](docs/configuration-ui.md) provides English/Chinese prompts and safe saves, so beginners need not edit TOML. Native applications need only the resulting environment, not the producer's files.
 
 ## What daily use looks like
 
@@ -54,20 +54,22 @@ Only this terminal and programs subsequently launched from it receive the change
 | Requirement | When you need it |
 |---|---|
 | Linux, WSL, or macOS with Bash or Zsh | To use the terminal integration. Ubuntu/macOS and Python 3.11/3.13 run in [CI](https://github.com/lin594/devwho/actions/workflows/ci.yml); WSL is also checked locally. |
-| Python **3.11+** | To run the currently available Python core, including its single-file version. |
+| One core | Go/Rust binary, Bash + jq + Perl, **or** Python 3.11+. [Choose one](implementations/README.md). |
 | Git **2.31+** | To follow this guide and switch Git identity. |
 | GitHub CLI (`gh`) | Optional: only for GitHub CLI account profiles and online identity checks. |
 | OpenSSH and an existing key | Optional: only for selecting a Git SSH key. |
 
 There are **no third-party Python dependencies at runtime**. The installation below uses your existing Python; pipx, Node.js, and Docker are not required. Windows PowerShell integration is planned; Windows users should use WSL for now.
 
-**No Python installed?** The planned Go/Rust executables and full Bash core are intended to remove that requirement. They are not available yet; follow the [implementation tasks](implementations/README.md). Python is not a requirement of the proposed native environment convention.
+**No Python installed?** Choose a tested Go/Rust artifact from a successful [CI run](https://github.com/lin594/devwho/actions/workflows/ci.yml), or install the [Bash core](implementations/bash/README.md). See the [download/build instructions and actual dependencies](implementations/README.md). CI artifacts are development builds, not tagged releases; GitHub requires sign-in to download them.
 
 ## Try it
 
 DevWho is an early **v0.1** project. Source is available on GitHub; there is no tagged release or package registry release yet. Already have `devwho --version` working? Continue with step 2.
 
 ### 1. Install once
+
+Choose [one core](implementations/README.md) first. The following source-install example is for users who already have Python 3.11+. With a Go/Rust/Bash core installed, skip to step 2.
 
 Run these commands in a Bash or Zsh terminal:
 
@@ -84,6 +86,8 @@ devwho --version
 Expected output: `devwho 0.1.0`. This installs one executable for your OS user, shared by all profiles. See [Getting started](docs/getting-started.md) for version checks, a pipx alternative, and updating or removing it.
 
 ### 2. Save your identities
+
+With the optional Go configuration frontend installed, run `devwho-setup configure` and follow the prompts. It saves the same file used by every core. Otherwise, use the editable example below. [Configuration UI and backups →](docs/configuration-ui.md)
 
 ```sh
 devwho config init

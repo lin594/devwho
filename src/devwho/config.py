@@ -89,6 +89,7 @@ class Config:
     default_profile: str | None = None
     shortcut_profile: str | None = None
     handoff_warning: bool = False
+    source_format: str = "toml"
 
 
 def config_path(environ: Mapping[str, str] | None = None) -> Path:

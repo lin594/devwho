@@ -2,47 +2,70 @@
 
 [English](README.md) | [简体中文](README.zh-CN.md) · [项目概览](../README.zh-CN.md)
 
-兼容核心让现有 Git、SSH 和 GitHub CLI 工作流程使用终端当前选择的上下文。我们希望用户可以选择适合自己机器的实现，同时保留**相同的 profile 文件、命令和行为**。
-
-目前只有 Python 核心已经实现。标记为“规划中”的项目仍是实现工作，不是可安装的发行版。[原生应用约定](../spec/environment-v1.zh-CN.md)是独立草案，不依赖任何一种兼容核心。
+兼容核心让现有 Git、SSH 和 GitHub CLI 工作流程使用终端当前选择的上下文。Python、Go、Rust、Bash 实现现在都遵循相同的 profile、命令、切换和恢复契约。按设备安装或构建**一种**核心即可。
 
 ## 实现选项
 
-| 实现 | 状态/源码 | 最终用户所需环境 | 提供它的原因 |
+| 实现 | 源码与分发 | 最终用户所需环境 | 说明 |
 |---|---|---|---|
-| Python | 可用源码：[`src/devwho`](../src/devwho)；[`bin/devwho`](../bin/devwho) | Python 3.11 或更高版本；运行时不需要第三方 Python 包 | 当前完整实现和回归测试基准。 |
-| Go | 规划中的完整移植；未来源码位于 `implementations/go/` | 匹配平台的预编译可执行文件；运行时无需 Python 或 Go 编译器 | 优先满足没有 Python 的用户，并便于分发单个二进制文件。 |
-| Rust | 规划中的完整移植；未来源码位于 `implementations/rust/` | 匹配平台的预编译可执行文件；运行时无需 Python 或 Rust 编译器 | 基于独立构建生态的完整实现。 |
-| Bash | 规划中的完整移植；未来源码位于 `implementations/bash/` | Bash，以及明确记录的系统工具和使用方工具；无需 Python 或编译器 | 为已有 Bash 的环境提供脚本安装方式。 |
+| Python | [`src/devwho`](../src/devwho)、[`bin/devwho`](../bin/devwho) | Python 3.11 或更高版本；运行时不需要第三方 Python 包 | 参考实现；保留现有 Python 安装说明。 |
+| Go | [`implementations/go`](go/README.md) | 预编译可执行文件运行时无需 Python 或编译器；源码构建需要 Go | 推荐初学者使用；`complete-cores-ubuntu-latest` 和 `complete-cores-macos-latest` 工作流运行中附有开发构建产物，下载需登录 GitHub。 |
+| Rust | [`implementations/rust`](rust/README.md) | 预编译可执行文件运行时无需 Python 或编译器；源码构建需要 Rust | 独立实现；构建和平台覆盖请参阅其 README。 |
+| Bash | [`implementations/bash`](bash/README.md) | Bash 3.2+、jq 1.6+、Perl 5.18+ 和标准系统工具 | 独立脚本实现；Perl 和 jq 是运行时依赖。 |
 
-用户只安装**一种**核心，而不是全部语言版本。核心使用哪种语言不限制调用它的 shell：每个完整移植版都必须提供 `init bash` 和 `init zsh`。在使用相应功能时，Git 2.31 或更高版本以及可选的 gh/OpenSSH 仍是使用方依赖。
+CI 产物是开发构建，不是正式标签发布。每次工作流运行会提供归档名称和校验和，归档目标对应实际运行平台。仓库尚未发布标签或托管发行版。Go/Rust 可执行文件运行时不需要 Python 或编译器；Bash 运行时不会调用 Python core。
 
-Go 和 Rust 会构建可执行应用；构建工具只需安装在构建机器上，不一定要装到用户机器。发行制品仍需明确操作系统/CPU 目标、校验和及系统库要求。交叉编译成功不能证明制品在目标环境能运行。参见官方 [Go 构建指南](https://go.dev/doc/tutorial/compile-install)和 [Rust 构建指南](https://doc.rust-lang.org/book/ch01-03-hello-cargo.html)。
+### 在 Linux 或 macOS 安装预编译 Go core
 
-Bash 面临更复杂的解析工作：当前配置格式是 TOML，可恢复状态也需要结构化校验。完整 Bash 移植版必须正确实现这些要求，不能只转换几行 `key=value`，也不能调用 Python 核心。优先使用 Bash 和标准系统工具；如果需要外部解析器或辅助程序，必须明确说明并评估它是否符合简化安装的目标。完整解析器尚未完成时，应标记为实验版，并保持完整核心事项开放。
+1. 打开仓库的 [Actions 工作流](https://github.com/lin594/devwho/actions/workflows/ci.yml)，选择成功的 `complete-cores-ubuntu-latest` 或 `complete-cores-macos-latest` 运行，然后下载其中的 `complete-cores-[OS]` artifact。解压下载的 GitHub artifact ZIP。
+2. 在解压后的目录中，先校验归档文件，再解包：
 
-## 兼容承诺
+   ```sh
+   cd /path/to/extracted-artifact
+   sha256sum -c SHA256SUMS       # Linux
+   shasum -a 256 -c SHA256SUMS  # macOS
+   ```
 
-所有实现都以[兼容核心 v1 契约](../spec/compatibility-core-v1.zh-CN.md)为目标：配置、切换、Git/gh 适配器、诊断、子进程行为以及安全的真实 shell 集成。只有通过通用一致性测试，并在 Python 不可用时通过运行时测试，移植版才算完成。Go/Rust 二进制文件或 Bash 函数调用 Python 不符合这一目标。
+3. 解包与 runner 对应的 Go 归档。Linux x86-64 使用 `devwho-go-linux-x86_64.tar.gz`；macOS 请使用 `SHA256SUMS` 中该 runner 对应的确切 `devwho-go-macos-ARCH.tar.gz` 文件名。例如：
 
-Python 源码树保留在现有位置，以维持包和构建兼容性。规范放在 `spec/`；语言实现会在有可工作的代码时分别放入各自目录。我们不会添加看起来可安装的空包骨架，也不会更改用户现有的工作区布局。
+   ```sh
+   tar -xzf devwho-go-linux-x86_64.tar.gz
+   cd devwho-go-linux-x86_64
+   # macOS 请替换为匹配的归档名，并 cd 到 devwho-go-macos-ARCH 目录。
+   ```
 
-文件格式是另一个选择：[可选的 dotenv 输入](../docs/zh-CN/configuration-formats.md)可以规范化为相同 profile 和切换引擎。每个完整移植版仍必须接受现有 TOML profile。Bash 核心如果只支持 dotenv，就不能算完成完整核心任务。
+   归档中包含 `devwho` 和可选的独立配置编辑器 `devwho-setup`。可将其中一个或两者安装到用户目录：
 
-## 交付顺序与跟踪工作
+   ```sh
+   mkdir -p "$HOME/.local/bin"
+   install -m 755 devwho "$HOME/.local/bin/devwho"
+   install -m 755 devwho-setup "$HOME/.local/bin/devwho-setup"
+   export PATH="$HOME/.local/bin:$PATH"
+   ```
 
-1. 建立共用契约和可执行的一致性 fixture。继续让 Python 实现通过测试，使其保留为参考实现。
-2. 优先完成 Go 核心，并测试可下载二进制文件，让最多用户摆脱 Python 依赖。
-3. 以相同测试套件开发完整的 Rust 和 Bash 替代实现。两者都可以分阶段提交并评审，但包装器或功能子集都不算完成。
-4. 只为实际存在且通过所声明目标平台测试的制品编写发布打包和安装说明。即使编译器能够生成 Windows 可执行文件，PowerShell/编辑器集成仍需单独验收。
+   如果准备手动编辑 TOML，可以跳过安装 `devwho-setup`。PATH 命令只对当前终端生效；如需在新终端中使用，请把该目录加入 shell 启动文件。用户机器不需要编译器。
+4. 可选：运行 `devwho-setup configure` 并按表单填写 profile。然后初始化 shell 并激活身份：
 
-| 任务 | 跟踪问题 |
-|---|---|
-| 原生上下文约定 | [RFC #1](https://github.com/lin594/devwho/issues/1) |
-| 完整核心共用一致性测试套件 | [#2](https://github.com/lin594/devwho/issues/2) |
-| Go 完整核心 | [#3](https://github.com/lin594/devwho/issues/3) |
-| Rust 完整核心 | [#4](https://github.com/lin594/devwho/issues/4) |
-| Bash 完整核心 | [#5](https://github.com/lin594/devwho/issues/5) |
-| 可选 dotenv 输入 | [#6](https://github.com/lin594/devwho/issues/6) |
+   ```sh
+   eval "$(devwho init bash)"  # 使用 Zsh 时将 `bash` 换成 `zsh`
+   setdev PROFILE_NAME
+   ```
 
-以上都是待完成事项，不代表实现已经完成。贡献时请让行为修复和双语说明在各实现之间保持一致。
+   `unsetdev` 会恢复 shell 初始环境。该命令会为当前 shell 固定此可执行文件和默认配置路径。
+
+
+核心的实现语言不限制调用它的 shell：所有实现都提供 `init bash` 和 `init zsh`。使用相应功能时仍需 Git 2.31 或更高版本以及可选的 `gh`/OpenSSH。Windows/PowerShell 和编辑器身份集成仍属实验或后续工作。
+
+## 共同行为与格式
+
+四种 core 都实现[兼容核心 v1 契约](../spec/compatibility-core-v1.zh-CN.md)，包括配置校验、profile 切换、Git/gh 适配器、诊断、子进程行为、真实 shell 集成和可恢复状态。[可执行的一致性 runner](../conformance/README.zh-CN.md)检查共用 fixture 及跨 core 的恢复状态互通。记录的结果和平台覆盖取决于具体实现与 runner；依赖某个平台前请查看相应记录。
+
+所有 core 都支持完整 TOML profile 和可选的、显式选择的[字面量 dotenv 输入](../spec/dotenv-v1.zh-CN.md)。dotenv 只选择一个通用环境变量 profile，不与 TOML 合并，也不会被 source 或插值。如果导出会丢失 Git、SSH、GitHub 或 unset 语义，命令会拒绝导出。详见[配置格式指南](../docs/zh-CN/configuration-formats.md)。
+
+可选的 [Go 配置前端](../docs/zh-CN/configuration-ui.md)提供中英文终端表单，以及带版本检查和私有备份的 read/replace 接口。它写入所有 core 共用的 TOML 格式，不是任何 core 的必需依赖。
+
+拟议的[原生环境变量约定](../spec/environment-v1.zh-CN.md)是独立草案。本仓库提供了一个仅用标准库的原生参考使用方示例，位于 [`examples/native-notes`](../examples/native-notes)；但不声称已有第三方采用或 Git/gh 原生集成。示例自行管理应用配置和存储，不依赖兼容核心。
+
+## 构建与贡献
+
+各实现 README 说明安装方式、运行时依赖和该实现的验证情况。使用 [`scripts/package_cores.py`](../scripts/package_cores.py) 构建产物；CI 的 `cores` job 会构建并测试 Ubuntu 和 macOS runner 产物。请查看[实际工作流运行](https://github.com/lin594/devwho/actions/workflows/ci.yml)，不要把已配置的 job 当作通过证据。修改共同行为前，请参阅[共用契约](../spec/compatibility-core-v1.zh-CN.md)、[一致性测试套件](../conformance/README.zh-CN.md)和[贡献指南](../CONTRIBUTING.zh-CN.md)。

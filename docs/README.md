@@ -9,8 +9,10 @@ New to DevWho? Start with the overview to see whether it fits your workflow, the
 | Understand what DevWho does | [Project overview](../README.md) |
 | Distinguish the future convention from today's adapters | [Ecosystem design](ecosystem.md) |
 | Read the proposed native application interface | [Environment convention draft](../spec/environment-v1.md) |
-| Understand versions, TOML, and proposed dotenv input | [Configuration formats](configuration-formats.md) |
+| Understand versions, TOML, and literal dotenv input | [Configuration formats](configuration-formats.md) |
 | Choose or contribute a complete core implementation | [Implementation roadmap](../implementations/README.md) and [common contract](../spec/compatibility-core-v1.md) |
+| Configure through English/Chinese prompts | [Configuration frontend](configuration-ui.md) |
+| Test a core as an executable | [Shared conformance](../conformance/README.md) |
 | Install it and verify my first profile | [Getting started](getting-started.md) |
 | Set a shared-machine default or use two identities | [Everyday workflows](use-cases.md) |
 | Connect existing gh logins, SSH keys, or an HTTPS helper | [Accounts and authentication](accounts.md) |

@@ -7,5 +7,6 @@ recursive-include examples *.toml
 recursive-include scripts *.py
 recursive-include bin devwho
 recursive-include tests *.py
+recursive-include conformance *.py *.json *.toml *.md *.sh Dockerfile
 recursive-include .github *.yml
 global-exclude __pycache__ *.py[cod]

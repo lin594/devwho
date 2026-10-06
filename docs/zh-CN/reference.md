@@ -4,7 +4,7 @@
 
 本页用于查找配置项和精确行为。首次设置请从[入门指南](getting-started.md)开始。
 
-本页说明**已经实现的兼容性 core**，目前使用 Python 编写。[原生环境变量约定](../../spec/environment-v1.zh-CN.md)是另一份草案；计划中的[完整 core 移植](../../implementations/README.zh-CN.md)需要保留下述命令和配置行为。
+本页说明 Python、Go、Rust、Bash 兼容 core 共用的已实现行为。请选择一种[核心实现](../../implementations/README.zh-CN.md)。[原生环境变量约定](../../spec/environment-v1.zh-CN.md)是独立草案；仓库包含参考使用方示例，但不声称已有第三方采用。
 
 ## 命令
 
@@ -16,13 +16,18 @@
 | `devwho doctor [PROFILE] [--offline]` | 将实际工具身份与 身份配置 对照。 |
 | `devwho exec PROFILE -- COMMAND ...` | 为一条命令及其子进程选择 身份配置。 |
 | `devwho config path` | 打印当前选用的配置文件路径。 |
-| `devwho config init` | 创建私有示例配置；若文件已存在则拒绝覆盖。 |
+| `devwho config init` | 创建私有 TOML 示例配置；若文件已存在则拒绝覆盖。dotenv 模式不可用。 |
+| `devwho config export-env PROFILE` | 将通用环境变量值导出为字面量 dotenv；拒绝有损转换。 |
 | `devwho init bash` / `devwho init zsh` | 打印供当前 shell 执行的集成代码。 |
 | `setdev PROFILE` | 在已初始化的 shell 中激活 身份配置。 |
 | `setdev` | 激活已配置的 `settings.shortcut_profile`。 |
 | `unsetdev` | 恢复此 shell 的原始 初始状态。 |
 
 使用 `devwho --config /absolute/path/config.toml COMMAND` 可为单条命令指定其他配置文件。
+
+## 显式 dotenv 输入
+
+使用 `--env-file PATH [--env-profile NAME]` 可选择可选的字面量 dotenv 格式，以替代 `--config`。文件必须用 `DEVWHO_PROFILE` 选择一个 profile，或由调用者提供 `--env-profile`；两者同时存在时必须一致。文件内容只作为数据，不会被 source、插值，也不会与 TOML 合并。`config export-env PROFILE` 只导出通用环境变量值；如果 profile 含有 Git、SSH、GitHub 或显式 unset 设置，命令会拒绝导出。语法和限制见 [dotenv v1 契约](../../spec/dotenv-v1.zh-CN.md)。
 
 ## 身份配置 配置
 

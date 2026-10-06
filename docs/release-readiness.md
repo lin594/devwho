@@ -1,16 +1,18 @@
 # Open-source readiness
 
-Assessment: 2026-10-06. Version: 0.1.0, unreleased. This checklist describes the development branch. Source hosting does not constitute a tagged or packaged release. The [CI workflow](https://github.com/lin594/devwho/actions/workflows/ci.yml) records hosted validation for each revision.
+Assessment: 2026-10-06. Version: 0.1.0, unreleased. This checklist describes the development branch. Source hosting does not constitute a tagged or packaged release. The [CI workflow](https://github.com/lin594/devwho/actions/workflows/ci.yml) records hosted validation for each revision. The `cores` job builds and tests Ubuntu/macOS artifacts; inspect that run for its actual result before release decisions. Artifacts are development builds, not tagged releases.
 
 ## Product and architecture
 
-Per-shell developer identity through environment variables. TOML profiles compile to a set/unset EnvironmentPatch, consumed by one shell or child process tree. No global active-profile file exists. Python 3.11+, standard library only at runtime.
+Per-shell developer identity through environment variables. Independent Python, Go, Rust, and Bash cores compile TOML profiles (or explicit dotenv input) to a set/unset environment patch consumed by one shell or child process tree. No global active-profile file exists. Python requires Python 3.11+; Go/Rust executables have no Python/compiler runtime requirement; Bash requires Bash 3.2+, jq 1.6+, and Perl 5.18+.
 
 Generic env is first-class and literal. Git name/email, basic signing configuration, Git SSH key selection, and GitHub CLI directory/host selection share the compiler. Bash/Zsh rendering keeps restoration state non-exported and preflights variable attributes before applying any assignments. Git replay authors retain native semantics through runtime config rather than persistent author environment variables.
 
-## Local acceptance evidence
+## Python regression evidence
 
-- The unified unittest suite passes locally. One Zsh-only string-attribute test is intentionally skipped under Bash, not because a supported shell is missing. Run the commands in [CONTRIBUTING.md](../CONTRIBUTING.md) for the current count and results.
+The following local evidence summarizes the Python regression suite. For Go, Rust and Bash implementation-specific results and gaps, see each [implementation README](../implementations/README.md); the [common runner](../conformance/README.md) results should be checked per target and revision.
+
+- The unified Python unittest suite passes locally. One Zsh-only string-attribute test is intentionally skipped under Bash, not because a supported shell is missing. Run the commands in [CONTRIBUTING.md](../CONTRIBUTING.md) for the current count and results.
 - Real independent Bash/Zsh processes remain alive while the other profile changes.
 - Missing, empty and nonempty baselines restore; different key sets, idempotence and child inheritance are covered.
 - Actual Git commits override stale local names; nonempty cherry-pick and rebase preserve original authors and select the current committer.
@@ -24,7 +26,7 @@ Generic env is first-class and literal. Git name/email, basic signing configurat
 
 ## Supported scope
 
-Locally verified: Linux/WSL, Python 3.13, Bash 5.2 and installed Zsh/Git. Bash integration avoids Bash 4-only constructs. CI includes Ubuntu/macOS and Python 3.11/3.13, selecting /bin/bash on macOS to test its system Bash. Refer to the workflow runs for hosted platform evidence.
+Python local verification covers Linux/WSL, Python 3.13, Bash 5.2, and installed Zsh/Git. Implementation-specific READMEs record other local targets and limitations. Bash integration avoids Bash 4-only constructs. CI includes Ubuntu/macOS and Python 3.11/3.13, selecting `/bin/bash` on macOS to test its system Bash. Refer to actual workflow runs for hosted platform evidence.
 
 Windows PowerShell and VS Code identity binding are deferred experimental work and are outside this package's supported interface.
 
@@ -50,4 +52,4 @@ Source/examples use fictional identities. Local design notes, profiles and backu
 - The project uses MIT licensing. Private vulnerability reports use the entry point in [SECURITY.md](../SECURITY.md).
 - No release tag, hosted release or package registry publication is included in the source push.
 
-The shell/process model has local v0.1 acceptance coverage. Confirm hosted CI and transport authentication separately before relying on an additional platform or live account setup.
+The Python, Go, Rust, and Bash shell/process models have recorded local acceptance coverage; each implementation README identifies its own limits. Confirm hosted CI and transport authentication separately before relying on an additional platform or live account setup. The optional native Go setup frontend has Linux x86-64 local evidence; Windows writes are unsupported. A native reference consumer example exists, but it does not establish third-party adoption.

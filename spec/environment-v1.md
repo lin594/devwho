@@ -28,7 +28,7 @@ A future native consumer could receive the value through an ordinary environment
 export DEVWHO_PROFILE=work
 ```
 
-The existing Python core already exports this marker on activation. A native consumer can use it without another marker. Exporting it manually does not invoke today's Git/gh adapters, and this repository does not claim that those tools already read it.
+All four compatibility cores export this marker on activation. A native consumer can use it without another marker. Exporting it manually does not invoke today's Git/gh adapters, and this repository does not claim that those tools already read it.
 
 | Additional candidate | Decision |
 |---|---|
@@ -79,7 +79,7 @@ A genuinely incompatible or required capability needs a separately reviewed inte
 | Convention documentation | Specification revision and change history. |
 | Current TOML profile schema | Existing `version = 1`, interpreted only by its core/parser. |
 | Internal restoration transport | Private state version used by compatible cores. |
-| Future dotenv input | Parser contract; plain key/value input need not export a version key. |
+| Optional dotenv core input | Its separate parser contract; plain key/value input need not export a version key. |
 
 Docker Compose's top-level `version` is now obsolete and does not select its validation schema. A version field alone does not define compatibility. DevWho retains its existing TOML version because its parser actually validates it; removing that requirement needs a separate migration. [Docker documentation](https://docs.docker.com/reference/compose-file/version-and-name/)
 
@@ -98,13 +98,13 @@ Labels inherit into children and can appear in diagnostics; keep secrets and sen
 | `GIT_CONFIG_*`, `GIT_SSH_COMMAND`, `GH_CONFIG_DIR`, `GH_HOST` | Adapter outputs defined by the corresponding tools. |
 | `HTTP_PROXY`, `http_proxy`, other unrelated variables | Preserved unless explicitly configured otherwise. |
 
-The current core reserves `DEVWHO_*` in generic profile env settings and supplies the marker itself. This draft changes neither the installed runtime nor its file loader. See [configuration formats](../docs/configuration-formats.md) for the separate dotenv proposal.
+The current core reserves `DEVWHO_*` in generic profile env settings and supplies the marker itself. This draft is separate from the installed runtime and its file loaders. The four cores implement explicit [dotenv v1 input](dotenv-v1.md), which does not change the native convention.
 
 ## 9. Review and adoption gates
 
 - Agree on stable selector meaning, grammar, absence/error behavior, explicit-account precedence, and unknown mappings.
 - Add language-neutral consumer cases, including environments from today's core and ordinary dotenv loaders.
-- Exercise a real consumer without importing the Python core or reading its private state/config files.
+- The repository now includes a stdlib-only [reference consumer example](../examples/native-notes/); it is illustrative and does not establish third-party adoption. Continue to validate independently maintained consumers without importing a core or reading its private state/config files.
 - Publish adoption status backed by actual integrations; adapter support alone is not native adoption.
 - Assess extensions against real consumer needs, with tests and a compatibility rationale.
 

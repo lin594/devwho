@@ -1,0 +1,32 @@
+{
+  "valid": [
+    {"id":"empty-before-comment","text":"DEVWHO_PROFILE=demo\nX= #comment\nY=\t#comment\nZ=#literal\n","env":{"X":"","Y":"","Z":"#literal"}},
+    {"id":"marker-only","text":"DEVWHO_PROFILE=demo\n","env":{}},
+    {"id":"literal","text":"DEVWHO_PROFILE=demo\nA=$HOME\nB=${HOME}\nC=$(touch sentinel)\n","env":{"A":"$HOME","B":"${HOME}","C":"$(touch sentinel)"}},
+    {"id":"comments","text":" # comment\nexport DEVWHO_PROFILE = demo # context\nA=x#literal\nB = x # comment\nC=\n","env":{"A":"x#literal","B":"x","C":""}},
+    {"id":"quotes","text":"DEVWHO_PROFILE='demo'\nA='literal \\n $HOME # retained'\nB=\"line\\nnext\\t\\u4e2d\\ud83d\\ude00\" # comment\nC=\"\"\n","env":{"A":"literal \\n $HOME # retained","B":"line\nnext\t中😀","C":""}},
+    {"id":"crlf","text":"DEVWHO_PROFILE=demo\r\nA=hello\r\n","env":{"A":"hello"}},
+    {"id":"escapes","text":"DEVWHO_PROFILE=demo\nA=\"\\\"\\\\\\/\\b\\f\\r\"\n","env":{"A":"\"\\/\b\f\r"}}
+  ],
+  "invalid": [
+    {"id":"duplicate","text":"DEVWHO_PROFILE=demo\nA=one\nA=two\n"},
+    {"id":"empty-marker","text":"DEVWHO_PROFILE=\n"},
+    {"id":"missing-marker","text":"A=value\n"},
+    {"id":"invalid-marker","text":"DEVWHO_PROFILE=../demo\n"},
+    {"id":"bare-key","text":"DEVWHO_PROFILE=demo\nA\n"},
+    {"id":"invalid-key","text":"DEVWHO_PROFILE=demo\nA.B=value\n"},
+    {"id":"nul","text":"DEVWHO_PROFILE=demo\nA=\u0000\n"},
+    {"id":"escaped-nul","text":"DEVWHO_PROFILE=demo\nA=\"\\u0000\"\n"},
+    {"id":"lone-cr","text":"DEVWHO_PROFILE=demo\nA=x\rB=y\n"},
+    {"id":"quote-tail","text":"DEVWHO_PROFILE=demo\nA='value'junk\n"},
+    {"id":"physical-multiline","text":"DEVWHO_PROFILE=demo\nA=\"line\nnext\"\n"},
+    {"id":"unterminated-single","text":"DEVWHO_PROFILE=demo\nA='value\n"},
+    {"id":"unknown-escape","text":"DEVWHO_PROFILE=demo\nA=\"\\q\"\n"},
+    {"id":"unpaired-surrogate","text":"DEVWHO_PROFILE=demo\nA=\"\\ud800\"\n"},
+    {"id":"author-override","text":"DEVWHO_PROFILE=demo\nGIT_AUTHOR_NAME=Someone\n"},
+    {"id":"runtime-count","text":"DEVWHO_PROFILE=demo\nGIT_CONFIG_COUNT=0\n"},
+    {"id":"runtime-index","text":"DEVWHO_PROFILE=demo\nGIT_CONFIG_KEY_0=user.name\n"},
+    {"id":"reserved-marker","text":"DEVWHO_PROFILE=demo\nDEVWHO_CONFIG=/tmp/elsewhere\n"},
+    {"id":"shell-startup","text":"DEVWHO_PROFILE=demo\nBASH_ENV=secret\n"}
+  ]
+}

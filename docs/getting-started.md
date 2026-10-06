@@ -4,7 +4,7 @@
 
 This guide gets you from a new installation to checking the identity Git will use. You do not need a GitHub login or a test commit for the first run.
 
-These instructions install the **currently available Python compatibility core**. Full Go, Rust, and Bash alternatives are [planned](../implementations/README.md); the separate [native environment convention](../spec/environment-v1.md) is a draft and needs no Python library in consumer applications.
+These instructions install the **currently available Python compatibility core**. Independent Go, Rust, and Bash alternatives are [available](../implementations/README.md); the separate [native environment convention](../spec/environment-v1.md) is a draft and needs no Python library in consumer applications.
 
 ## Check your terminal and tools
 

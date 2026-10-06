@@ -9,8 +9,10 @@
 | 了解 DevWho 能做什么 | [项目介绍](../../README.zh-CN.md) |
 | 区分未来的原生约定与当前兼容层 | [生态设计](ecosystem.md) |
 | 阅读面向原生应用的环境变量接口 | [环境约定草案](../../spec/environment-v1.zh-CN.md) |
-| 理解版本、TOML 与提议中的 dotenv 输入 | [配置格式](configuration-formats.md) |
-| 选择或贡献完整的 core 实现 | [多语言实现路线](../../implementations/README.zh-CN.md)和[共同兼容性要求](../../spec/compatibility-core-v1.zh-CN.md) |
+| 理解版本、TOML 与字面量 dotenv 输入 | [配置格式](configuration-formats.md) |
+| 选择或贡献完整的 core 实现 | [多语言实现指南](../../implementations/README.zh-CN.md)和[共同兼容性要求](../../spec/compatibility-core-v1.zh-CN.md) |
+| 使用中英文交互表单配置 | [配置前端](configuration-ui.md) |
+| 将 core 作为可执行程序进行一致性测试 | [共用一致性套件](../../conformance/README.zh-CN.md) |
 | 安装并检查第一个身份配置 | [入门指南](getting-started.md) |
 | 设置共用电脑的默认身份，或使用两个身份 | [日常使用场景](use-cases.md) |
 | 使用现有 gh 登录、SSH 密钥或 HTTPS 凭据助手 | [账号与身份验证](accounts.md) |

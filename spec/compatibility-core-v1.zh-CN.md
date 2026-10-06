@@ -2,7 +2,7 @@
 
 [English](compatibility-core-v1.md) | [简体中文](compatibility-core-v1.zh-CN.md) · [各语言实现](../implementations/README.zh-CN.md)
 
-**状态：**用于重新实现当前 v0.1 核心的契约；Python 实现已经存在，共用跨语言测试运行器和其他实现仍在规划中。本契约与拟议的[原生环境约定](environment-v1.zh-CN.md)相互独立。
+**状态：**Python、Go、Rust、Bash 均已实现，并有[共用可执行一致性 runner](../conformance/README.zh-CN.md)。本契约与拟议的[原生环境约定](environment-v1.zh-CN.md)相互独立。
 
 基准行为以 [946ad9e](https://github.com/lin594/devwho/tree/946ad9ef771750aab9570992f8af77575a69570b) 中的 Python 核心、[命令参考](../docs/zh-CN/reference.md)和回归测试为准。对此基准的修正必须作为明确且有文档记录的契约变更提出，不能成为不同语言实现间的意外差异。只通过少数切换示例不足以证明完整兼容。
 
@@ -34,7 +34,7 @@
 
 遵守版本 1 架构和查找优先级：显式 `--config`，然后 `DEVWHO_CONFIG`，再 `$XDG_CONFIG_HOME/devwho/config.toml`，最后 `~/.config/devwho/config.toml`。原生应用不必读取此文件。
 
-TOML 是必须继续支持的**现有兼容格式**，但不是整个生态永久只能使用的格式。未来可以增加[dotenv 前端](../docs/zh-CN/configuration-formats.md)，并规范化为相同的 profile/切换模型。它必须明确自己的语法和优先级，继续兼容现有 profile，不能用功能子集替代完整 TOML 支持。
+TOML 是必须继续支持的**现有兼容格式**，但不是整个生态永久只能使用的格式。已提供可选的 [dotenv 输入](dotenv-v1.zh-CN.md)，规范化为相同的 profile/切换模型。该格式使用独立的语法和选择规则，同时保留完整 TOML 支持。
 
 所有实现都必须接受基准架构可接受的 TOML 1.0 配置编码，包括带引号键、点分键、内联表、多行字符串、Unicode 转义和多行数组。无效 TOML、重复定义、未知字段、类型错误和无效 profile 都必须拒绝。逐行读取键值的近似解析器不算兼容的 TOML 解析器。[TOML 1.0 规范](https://toml.io/en/v1.0.0)
 

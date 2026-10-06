@@ -1,0 +1,13 @@
+{
+  "cases": [
+    {"name":"missing uses app default","env_present":false,"env":"","explicit":"","want":"personal"},
+    {"name":"empty uses app default","env_present":true,"env":"","explicit":"","want":"personal"},
+    {"name":"mapped label selects configured account","env_present":true,"env":"work","explicit":"","want":"work-account"},
+    {"name":"case is significant","env_present":true,"env":"Work","explicit":"","error":"no account mapping"},
+    {"name":"malformed whitespace fails","env_present":true,"env":" work ","explicit":"","error":"invalid DEVWHO_PROFILE"},
+    {"name":"unknown label fails","env_present":true,"env":"unknown","explicit":"","error":"no account mapping"},
+    {"name":"explicit account overrides unknown environment","env_present":true,"env":"unknown","explicit":"work-account","want":"work-account"},
+    {"name":"explicit account overrides malformed environment","env_present":true,"env":"bad label","explicit":"personal","want":"personal"},
+    {"name":"invalid explicit account fails","env_present":false,"env":"","explicit":"missing","error":"unknown account"}
+  ]
+}

@@ -2,7 +2,7 @@
 
 [English](compatibility-core-v1.md) | [简体中文](compatibility-core-v1.zh-CN.md) · [Implementations](../implementations/README.md)
 
-**Status:** contract for reimplementing the current v0.1 core; the Python implementation exists, and the common cross-language test runner and other implementations are planned. This is separate from the proposed [native environment convention](environment-v1.md).
+**Status:** implemented by Python, Go, Rust and Bash, with a [shared executable conformance runner](../conformance/README.md). This is separate from the proposed [native environment convention](environment-v1.md).
 
 The baseline is the behavior of the Python core at [946ad9e](https://github.com/lin594/devwho/tree/946ad9ef771750aab9570992f8af77575a69570b), its [command reference](../docs/reference.md), and regression tests. Fixes to that baseline must be explicit, documented contract changes, not accidental differences between ports. Passing a few switching examples is insufficient to claim full compatibility.
 
@@ -34,7 +34,7 @@ Match command output semantics and exit codes. Help layout, JSON whitespace, and
 
 Keep the version 1 schema and lookup precedence: explicit `--config`, then `DEVWHO_CONFIG`, then `$XDG_CONFIG_HOME/devwho/config.toml`, then `~/.config/devwho/config.toml`. Native applications are not required to read this file.
 
-TOML is a required **existing compatibility format**, not a permanent restriction on the ecosystem. A future [dotenv frontend](../docs/configuration-formats.md) may normalize into the same profile/transition model. It must specify its own syntax and precedence, keep existing profiles working, and not replace full TOML support with a feature subset.
+TOML is a required **existing compatibility format**, not a permanent restriction on the ecosystem. The optional [dotenv input](dotenv-v1.md) normalizes into the same profile/transition model under its own grammar and selection rules; full TOML support remains required.
 
 All implementations must accept the TOML 1.0 encodings of configurations accepted by the baseline schema, including quoted/dotted keys, inline tables, multiline strings, Unicode escapes, and multiline arrays. They must reject invalid TOML, duplicate definitions, unknown fields, wrong types, and invalid profiles. A line-oriented key/value approximation is not a compatible TOML parser. [TOML 1.0 specification](https://toml.io/en/v1.0.0)
 

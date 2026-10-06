@@ -1,72 +1,54 @@
-# DevWho 需要 TOML 吗？dotenv 应放在哪里？
+# 配置文件与应用读取的环境
 
-[English](../configuration-formats.md) | [简体中文](configuration-formats.md) · [生态概览](ecosystem.md)
+[English](../configuration-formats.md) | [简体中文](configuration-formats.md) · [生态](ecosystem.md)
 
-**建议：**让运行时约定与文件格式无关，保留现有 TOML profile，并在解析和切换规则确定后，将 dotenv 作为可选的简单输入格式。DevWho 核心加载 dotenv 目前只是提案，尚未实现。跟踪事项见 [issue #6](https://github.com/lin594/devwho/issues/6)。
+原生应用只需读取 `DEVWHO_PROFILE`，无须 TOML 解析器、dotenv 库、DevWho SDK，也不需要访问其他程序的配置文件。用户如何编辑和保存 profile 是另一层的问题。
 
-## 三个不同的问题
+## 按需求选择输入方式
 
-| 关注点 | 契约 |
+| 需求 | 使用方式 |
 |---|---|
-| 原生应用读取什么 | 从进程环境读取 `DEVWHO_PROFILE`。应用不必打开配置文件，也不需要知道值是如何保存的。 |
-| 提供方如何保存用户选择 | 由提供方决定：现有 TOML、拟议的 dotenv、IDE 设置或其他表示方式。 |
-| 兼容核心如何切换现有工具 | 将经过校验的 profile 转为可恢复的环境补丁和有序 Git 运行时配置。所有核心实现都保留这些语义。 |
+| 按提示配置 Git、账号及默认身份 | 可选的[中英文配置前端](configuration-ui.md)，保存所有 core 共用的普通 TOML。 |
+| 完整 Git/GitHub/SSH 设置、多 profile、有序 Git 配置或显式删除变量 | 保留现有第 1 版 TOML 格式与校验规则。 |
+| 少量字面量环境设置 | 显式 dotenv 输入，Python、Go、Rust、Bash 均支持。 |
+| 为应用增加原生支持 | 读取进程环境，再使用应用自己的账号映射；不需要读取提供方的文件。 |
 
 ```text
-现有 TOML ───────────┐
-拟议的 dotenv 输入 ──┼→ 规范化 profile → 共用校验/切换规则
-其他提供方输入 ─────┘                    → 当前工具适配器
+交互配置 / 机器写入接口 → 校验后的 profile 存储（目前为 TOML）
+字面量 dotenv 输入 ────→ 校验后的 profile
+                                  ↓
+                             当前会话切换
+                                  ↓
+                    DEVWHO_PROFILE + 现有工具适配器
 
-任意上下文提供方 → DEVWHO_PROFILE → 原生应用自己的账号映射
+原生应用 → 读取 DEVWHO_PROFILE → 应用自己的账号映射
 ```
 
-与其要求未来每个提供方都使用 TOML，不如确保共用模型和行为一致。当前文件格式仍是现有兼容契约的一部分，因此不能让现有用户失去可用配置。
+不需要守护进程，也没有全局“当前账号”文件。保存配置与激活身份是两件事。未来可以更换存储后端，继续使用相同的校验和会话模型，而不改变应用约定。
 
-## 普通 dotenv 文件可以提供原生上下文
+## 试用 dotenv profile
 
-对于已经支持 dotenv 的启动器，文件可以只有这一行：
+把以下内容保存为私有的 `work.env`：
 
 ```dotenv
 DEVWHO_PROFILE=work
-```
-
-启动器加载后，未来的原生使用方就能从环境读取该值。它不需要 `version` 行、Python 依赖或 dotenv 文件本身。这不是新增的 `devwho` 命令；如果没有适配器，今天的 Git 或 gh 也不会因此自动选账号。
-
-Dotenv 也可以保存现有工具使用的字面设置。例如：
-
-```dotenv
-GH_HOST=github.com
-GH_CONFIG_DIR=/home/jane/.config/gh-work
 EDITOR=vim
+APP_ACCOUNT=work
 ```
 
-这些是现有工具接口，不是新增的通用 DevWho 变量。未来核心的加载器应通过同一套可恢复引擎应用这些值，而不是 source 文件后丢失 baseline 和冲突检查。仅选择 gh 目录并不能验证其登录。
+```sh
+devwho --env-file ./work.env exec work -- env
+eval "$(devwho --env-file ./work.env init bash)"  # Zsh 改用 zsh
+setdev
+unsetdev
+```
 
-## 为什么保留现有结构化格式？
+第一条命令会打印子进程环境，请在适合显示环境内容的场合使用。`setdev` 通过同一套可恢复引擎应用配置。文件中没有 marker 时，必须添加 `--env-profile work`。不会自动查找 `.env`，也不会与 TOML 合并；`$HOME` 和看似命令的内容均按字面值保留。
 
-| 需求 | 普通 `KEY=value` | 现有 TOML profile |
-|---|---|---|
-| 字面环境设置 | 很自然。 | `env` 支持。 |
-| 空值 | 可以用 `KEY=` 表示。 | 使用空字符串。 |
-| 明确移除变量 | dotenv 没有通用表示；缺少某个键不等于移除变量。 | 使用 `unset_env`。 |
-| Git author、签名、SSH 和预期 gh 账号 | 可以设置原始工具变量，但无法表达所有语义校验。 | 使用有类型的字段，并执行冲突检查和诊断预期校验。 |
-| 重复且有序的 Git 配置 | 扁平映射很难自然地保留重复项。 | `git.config` 下的值数组可以保留顺序。 |
-| 多个 profile 和启动默认值/快捷方式 | 还需选择文件，并另定元数据约定。 | 现有命名 profile 和 `settings` 已支持。 |
+仅含普通环境设置的 TOML profile 可用 `devwho config export-env PROFILE` 导出。简单 dotenv 无法完整表达的 Git/GitHub/SSH 语义设置或显式删除操作，会让导出明确失败，而不是静默丢失。缺少键与空值含义不同。详见[完整语法、选择及导出契约](../../spec/dotenv-v1.zh-CN.md)。
 
-把 JSON 数组塞进环境变量字符串，或设计一堆带编号的键，只会以更不清晰的方式重造结构化格式。我们应支持范围明确的简单 dotenv 用例，而不是假装它能表达所有现有功能。高级用户可以继续使用 TOML；未来完整的扁平格式需要单独设计并配套共用测试，不能悄悄丢失功能。
+## 为什么 profile 存储仍使用 TOML
 
-## 拟议的核心 dotenv 加载规则
+普通环境赋值无法完整描述有序重复 Git 配置、默认/快捷 profile、显式删除及预期 GitHub 账号。把它们塞入编号变量或 JSON 字符串，实际上是在再造一种结构化协议。配置界面让初学者不必处理这些细节；原生应用则始终不必解析它。
 
-Dotenv 并没有一种普遍适用的统一语法：Node 明确记录了自己的语法，而 Docker Compose 会在未加引号和双引号的值中执行插值。DevWho 必须自行选择并测试行为，不能让每种语言的实现各自继承所用库的语法。[Node 文档](https://nodejs.org/api/environment_variables.html#dotenv)、[Compose 插值规则](https://docs.docker.com/compose/how-tos/environment-variables/variable-interpolation/)
-
-实现可选输入格式前，必须：
-
-1. 定义精简的字面语法，并为 UTF-8、LF/CRLF、空白、注释、引号、转义、重复键和无效/NUL 输入准备共用 fixture。不得使用 `source`、`eval`、命令替换或隐式 `$VAR` 插值。明确拒绝不支持的语法。
-2. 区分键缺失、空值和显式移除。不要意外发明 unset 语法。在明确规定扩展前，移除变量仍使用现有结构化格式。
-3. 明确如何在输入中指定 profile、用户如何显式选择文件，以及输入值如何与 TOML/默认值合并。拒绝歧义，或明确给出优先级。不得根据当前目录自动加载仓库里的 `.env`。
-4. 将 `DEVWHO_PROFILE` 选择元数据与任意环境赋值分开。如果所选 profile 名称与文件中的标记冲突，必须在改动环境前解决。继续保留现有的保留键、author/token 和 shell 属性检查。
-5. 复用规范化、校验、原子性、恢复和诊断逻辑。如果未来接受原始 `GIT_CONFIG_*` 区块，就必须明确管理区块的规范化和索引校验；直接赋值 count/index 变量会覆盖无关运行时设置。持久设置 `GIT_AUTHOR_*` 不能替代 Git 适配器。
-6. 继续明确执行预期账号验证。通用 env-only profile 不得声称可以执行依赖 `expected_user` 和 GitHub 适配器冲突规则的语义化 GitHub 检查。
-7. 为每个声称支持 dotenv 的实现添加等价测试。完整 Go/Rust/Bash 移植版仍须兼容 TOML；只提供 dotenv 不能算完整核心移植。
-
-首个 dotenv 实现应解决范围清晰的字面环境变量使用场景。原生应用和其他提供方都不应被迫实现 DevWho 的 TOML 解析器才能加入生态。在有明确且兼容的迁移方案前，现有核心会继续支持 TOML。
+TOML 是当前可替换的存储格式，也是对已有用户的兼容承诺，不是整个生态的硬性要求。dotenv 则适合它能够完整表达的简单输入。两者都无需 `DEVWHO_SPEC_VERSION` 环境变量；文件格式版本与规范文档修订号各有用途。

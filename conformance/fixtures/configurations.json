@@ -1,0 +1,363 @@
+[
+  {
+    "name": "empty-profile",
+    "toml": "version=1\n[profiles.a]\n",
+    "valid": true,
+    "env": {
+      "DEVWHO_PROFILE": "a"
+    }
+  },
+  {
+    "name": "inline-tables",
+    "toml": "version=1\nprofiles.a={env={VALUE=\"inline\",EMPTY=\"\"}}\n",
+    "valid": true,
+    "env": {
+      "VALUE": "inline",
+      "EMPTY": ""
+    }
+  },
+  {
+    "name": "quoted-dotted-keys",
+    "toml": "version=1\n[\"profiles\".\"a\".\"env\"]\n\"VALUE\"=\"quoted\"\n",
+    "valid": true,
+    "env": {
+      "VALUE": "quoted"
+    }
+  },
+  {
+    "name": "multiline-and-unicode",
+    "toml": "version=1\n[profiles.a.env]\nVALUE=\"\"\"\nline one\nline two\"\"\"\nSNOW=\"\\u96EA\\U0001F680\"\n",
+    "valid": true,
+    "env": {
+      "VALUE": "line one\nline two",
+      "SNOW": "雪🚀"
+    }
+  },
+  {
+    "name": "literal-and-escaped",
+    "toml": "version=1\n[profiles.a.env]\nVALUE='${HOME} $(touch marker) `touch other`'\nCONTROL=\"\\u0001\\t\\n\"\n",
+    "valid": true,
+    "env": {
+      "VALUE": "${HOME} $(touch marker) `touch other`",
+      "CONTROL": "\u0001\t\n"
+    }
+  },
+  {
+    "name": "multiline-literal",
+    "toml": "version=1\n[profiles.a.env]\nVALUE='''\nline1\nline2'''\n",
+    "valid": true,
+    "env": {
+      "VALUE": "line1\nline2"
+    }
+  },
+  {
+    "name": "git-pair-order",
+    "toml": "version=1\n[profiles.a.git.config]\n\"z.first\"=[\"one\",\n\"two\",]\n\"a.last\"=\"three\"\n",
+    "valid": true,
+    "runtime": [
+      [
+        "z.first",
+        "one"
+      ],
+      [
+        "z.first",
+        "two"
+      ],
+      [
+        "a.last",
+        "three"
+      ]
+    ]
+  },
+  {
+    "name": "signing",
+    "toml": "version=1\n[profiles.a.git]\nsigning_key=\"fixture\"\nsigning_format=\"ssh\"\nsign_commits=false\n",
+    "valid": true,
+    "runtime": [
+      [
+        "user.signingKey",
+        "fixture"
+      ],
+      [
+        "gpg.format",
+        "ssh"
+      ],
+      [
+        "commit.gpgSign",
+        "false"
+      ]
+    ]
+  },
+  {
+    "name": "typed-identity",
+    "toml": "version=1\n[profiles.a.git]\nname=\"Sample User\"\nemail=\"sample@example.test\"\n",
+    "valid": true,
+    "runtime": [
+      [
+        "user.name",
+        "Sample User"
+      ],
+      [
+        "user.email",
+        "sample@example.test"
+      ],
+      [
+        "author.name",
+        "Sample User"
+      ],
+      [
+        "author.email",
+        "sample@example.test"
+      ],
+      [
+        "committer.name",
+        "Sample User"
+      ],
+      [
+        "committer.email",
+        "sample@example.test"
+      ]
+    ]
+  },
+  {
+    "name": "windows-newlines",
+    "toml": "version = 1\r\n[profiles.a.env]\r\nVALUE = \"crlf\"\r\n",
+    "valid": true,
+    "env": {
+      "VALUE": "crlf"
+    }
+  },
+  {
+    "name": "inline-nested",
+    "toml": "version=1\n[profiles]\na={env={A=\"a\",B=\"b\"},unset_env=[\"DROP\"]}\n",
+    "valid": true,
+    "env": {
+      "A": "a",
+      "B": "b",
+      "DROP": null
+    }
+  },
+  {
+    "name": "escaped-quoted-key",
+    "toml": "version=1\n[profiles.a.env]\n\"V\\u0041LUE\"=\"decoded\"\n",
+    "valid": true,
+    "env": {
+      "VALUE": "decoded"
+    }
+  },
+  {
+    "name": "missing-version",
+    "toml": "[profiles.a]\n",
+    "valid": false
+  },
+  {
+    "name": "wrong-version",
+    "toml": "version=2\n[profiles.a]\n",
+    "valid": false
+  },
+  {
+    "name": "boolean-version",
+    "toml": "version=true\n[profiles.a]\n",
+    "valid": false
+  },
+  {
+    "name": "no-profiles",
+    "toml": "version=1\n",
+    "valid": false
+  },
+  {
+    "name": "no-default-target",
+    "toml": "version=1\n[settings]\ndefault_profile=\"missing\"\n[profiles.a]\n",
+    "valid": false
+  },
+  {
+    "name": "bad-boolean",
+    "toml": "version=1\n[settings]\nhandoff_warning=\"true\"\n[profiles.a]\n",
+    "valid": false
+  },
+  {
+    "name": "unknown-root",
+    "toml": "version=1\nextra=true\n[profiles.a]\n",
+    "valid": false
+  },
+  {
+    "name": "unknown-profile",
+    "toml": "version=1\n[profiles.a]\nextra=\"oops\"\n",
+    "valid": false
+  },
+  {
+    "name": "invalid-profile",
+    "toml": "version=1\n[profiles.\"bad name\"]\n",
+    "valid": false
+  },
+  {
+    "name": "identity-pair",
+    "toml": "version=1\n[profiles.a.git]\nname=\"Sample\"\n",
+    "valid": false
+  },
+  {
+    "name": "identity-delimiter",
+    "toml": "version=1\n[profiles.a.git]\nname=\"Bad <Name>\"\nemail=\"x@example.test\"\n",
+    "valid": false
+  },
+  {
+    "name": "identity-whitespace",
+    "toml": "version=1\n[profiles.a.git]\nname=\" Sample\"\nemail=\"x@example.test\"\n",
+    "valid": false
+  },
+  {
+    "name": "signing-format",
+    "toml": "version=1\n[profiles.a.git]\nsigning_format=\"unsupported\"\n",
+    "valid": false
+  },
+  {
+    "name": "signing-boolean",
+    "toml": "version=1\n[profiles.a.git]\nsign_commits=1\n",
+    "valid": false
+  },
+  {
+    "name": "empty-runtime-array",
+    "toml": "version=1\n[profiles.a.git.config]\n\"http.proxy\"=[]\n",
+    "valid": false
+  },
+  {
+    "name": "wrong-runtime-type",
+    "toml": "version=1\n[profiles.a.git.config]\n\"http.proxy\"=42\n",
+    "valid": false
+  },
+  {
+    "name": "bad-git-key",
+    "toml": "version=1\n[profiles.a.git.config]\n\"no-section\"=\"value\"\n",
+    "valid": false
+  },
+  {
+    "name": "gh-missing-user",
+    "toml": "version=1\n[profiles.a.github]\nconfig_dir=\"/fixture\"\n",
+    "valid": false
+  },
+  {
+    "name": "gh-bad-user",
+    "toml": "version=1\n[profiles.a.github]\nconfig_dir=\"/fixture\"\nexpected_user=\"bad user\"\n",
+    "valid": false
+  },
+  {
+    "name": "gh-bad-host",
+    "toml": "version=1\n[profiles.a.github]\nconfig_dir=\"/fixture\"\nexpected_user=\"sample\"\nhostname=\"host/path\"\n",
+    "valid": false
+  },
+  {
+    "name": "env-nonstring",
+    "toml": "version=1\n[profiles.a.env]\nVALUE=1\n",
+    "valid": false
+  },
+  {
+    "name": "env-nul",
+    "toml": "version=1\n[profiles.a.env]\nVALUE=\"\\u0000\"\n",
+    "valid": false
+  },
+  {
+    "name": "unset-nonstrings",
+    "toml": "version=1\n[profiles.a]\nunset_env=[1]\n",
+    "valid": false
+  },
+  {
+    "name": "overlap",
+    "toml": "version=1\n[profiles.a]\nunset_env=[\"VALUE\"]\n[profiles.a.env]\nVALUE=\"x\"\n",
+    "valid": false
+  },
+  {
+    "name": "semantic-overlap",
+    "toml": "version=1\n[profiles.a.github]\nconfig_dir=\"/fixture\"\nexpected_user=\"sample\"\n[profiles.a.env]\nGH_HOST=\"github.com\"\n",
+    "valid": false
+  },
+  {
+    "name": "duplicate-key",
+    "toml": "version=1\n[profiles.a.env]\nVALUE=\"x\"\nVALUE=\"y\"\n",
+    "valid": false
+  },
+  {
+    "name": "duplicate-table",
+    "toml": "version=1\n[profiles.a.env]\n[profiles.a.env]\n",
+    "valid": false
+  },
+  {
+    "name": "inline-table-reopen",
+    "toml": "version=1\nprofiles.a={env={VALUE=\"x\"}}\n[profiles.a.env]\nOTHER=\"y\"\n",
+    "valid": false
+  },
+  {
+    "name": "invalid-toml",
+    "toml": "version=1\n[profiles.a.env]\nVALUE=[\n",
+    "valid": false
+  },
+  {
+    "name": "invalid-unicode",
+    "toml": "version=1\n[profiles.a.env]\nVALUE=\"\\uD800\"\n",
+    "valid": false
+  },
+  {
+    "name": "reserved-DEVWHO_PROFILE",
+    "toml": "version=1\n[profiles.a.env]\n\"DEVWHO_PROFILE\"=\"forbidden\"\n",
+    "valid": false
+  },
+  {
+    "name": "reserved-DEVWHO_OTHER",
+    "toml": "version=1\n[profiles.a.env]\n\"DEVWHO_OTHER\"=\"forbidden\"\n",
+    "valid": false
+  },
+  {
+    "name": "reserved-__DEVWHO_STATE",
+    "toml": "version=1\n[profiles.a.env]\n\"__DEVWHO_STATE\"=\"forbidden\"\n",
+    "valid": false
+  },
+  {
+    "name": "reserved-__devwho_private",
+    "toml": "version=1\n[profiles.a.env]\n\"__devwho_private\"=\"forbidden\"\n",
+    "valid": false
+  },
+  {
+    "name": "reserved-GIT_CONFIG_COUNT",
+    "toml": "version=1\n[profiles.a.env]\n\"GIT_CONFIG_COUNT\"=\"forbidden\"\n",
+    "valid": false
+  },
+  {
+    "name": "reserved-GIT_CONFIG_KEY_x",
+    "toml": "version=1\n[profiles.a.env]\n\"GIT_CONFIG_KEY_x\"=\"forbidden\"\n",
+    "valid": false
+  },
+  {
+    "name": "reserved-GIT_AUTHOR_NAME",
+    "toml": "version=1\n[profiles.a.env]\n\"GIT_AUTHOR_NAME\"=\"forbidden\"\n",
+    "valid": false
+  },
+  {
+    "name": "reserved-IFS",
+    "toml": "version=1\n[profiles.a.env]\n\"IFS\"=\"forbidden\"\n",
+    "valid": false
+  },
+  {
+    "name": "reserved-BASH_ENV",
+    "toml": "version=1\n[profiles.a.env]\n\"BASH_ENV\"=\"forbidden\"\n",
+    "valid": false
+  },
+  {
+    "name": "reserved-ENV",
+    "toml": "version=1\n[profiles.a.env]\n\"ENV\"=\"forbidden\"\n",
+    "valid": false
+  },
+  {
+    "name": "reserved-ZDOTDIR",
+    "toml": "version=1\n[profiles.a.env]\n\"ZDOTDIR\"=\"forbidden\"\n",
+    "valid": false
+  },
+  {
+    "name": "reserved-PROMPT_COMMAND",
+    "toml": "version=1\n[profiles.a.env]\n\"PROMPT_COMMAND\"=\"forbidden\"\n",
+    "valid": false
+  },
+  {
+    "name": "reserved-BAD-KEY",
+    "toml": "version=1\n[profiles.a.env]\n\"BAD-KEY\"=\"forbidden\"\n",
+    "valid": false
+  }
+]

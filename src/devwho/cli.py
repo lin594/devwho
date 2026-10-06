@@ -19,7 +19,10 @@ def parser() -> argparse.ArgumentParser:
         prog="devwho", description="Per-shell developer identity through environment variables."
     )
     root.add_argument("--version", action="version", version="devwho " + __version__)
-    root.add_argument("--config", type=Path, help="use this TOML configuration")
+    source = root.add_mutually_exclusive_group()
+    source.add_argument("--config", type=Path, help="use this TOML configuration")
+    source.add_argument("--env-file", type=Path, help="use an explicit literal dotenv input")
+    root.add_argument("--env-profile", help="name the profile supplied by --env-file")
     commands = root.add_subparsers(dest="command", required=True)
     commands.add_parser("list", help="list profile names")
     show = commands.add_parser("show", help="show metadata; custom env values stay hidden")
@@ -33,7 +36,8 @@ def parser() -> argparse.ArgumentParser:
     execute.add_argument("profile")
     execute.add_argument("argv", nargs=argparse.REMAINDER)
     config = commands.add_parser("config", help="locate or create configuration")
-    config.add_argument("action", choices=["path", "init"])
+    config.add_argument("action", choices=["path", "init", "export-env"])
+    config.add_argument("profile", nargs="?")
     init = commands.add_parser("init", help="print shell integration; does not edit startup files")
     init.add_argument("shell", choices=["bash", "zsh"])
     internal = commands.add_parser("internal", help=argparse.SUPPRESS)
@@ -193,10 +197,15 @@ def _notice(config) -> int:
 def main(argv: list[str] | None = None) -> int:
     args = parser().parse_args(argv)
     try:
+        if args.env_profile is not None and args.env_file is None:
+            raise ValueError("--env-profile requires --env-file")
+        if args.command == "config":
+            if (args.action == "export-env") != (args.profile is not None):
+                raise ValueError("Only config export-env requires a profile argument")
         if args.command == "current":
             print(os.environ.get("DEVWHO_PROFILE") or "none")
             if args.verbose:
-                print("Configuration: " + str(args.config or config_path()))
+                print("Configuration: " + str(args.env_file or args.config or config_path()))
                 print("GitHub config directory: " + os.environ.get("GH_CONFIG_DIR", "default"))
                 print("GitHub hostname: " + os.environ.get("GH_HOST", "github.com"))
                 for label, variable in [
@@ -214,11 +223,13 @@ def main(argv: list[str] | None = None) -> int:
                     print(label + ": " + (identity or "unavailable"))
                 print("Use devwho doctor to verify actual tool identity.")
             return 0
-        if args.command == "config":
-            path = args.config or config_path()
+        if args.command == "config" and args.action != "export-env":
+            path = args.env_file or args.config or config_path()
             if args.action == "path":
                 print(path)
                 return 0
+            if args.env_file:
+                raise ValueError("config init cannot overwrite a dotenv input")
             # Bootstrap is explicit, exclusive, restrictive, and never overwrites.
             path.parent.mkdir(mode=0o700, parents=True, exist_ok=True)
             fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
@@ -230,7 +241,19 @@ def main(argv: list[str] | None = None) -> int:
                 )
             print("Created " + str(path) + "; edit its example identities before use.")
             return 0
-        config = load_config(args.config)
+        if args.env_file:
+            from .dotenv import load_dotenv
+
+            config = load_dotenv(args.env_file, args.env_profile, os.environ)
+        else:
+            config = load_config(args.config)
+        if args.command == "config" and args.action == "export-env":
+            from .dotenv import export_dotenv
+
+            if args.profile not in config.profiles:
+                raise ValueError("Unknown profile; run devwho list")
+            print(export_dotenv(config.profiles[args.profile]), end="")
+            return 0
         if args.command == "list":
             for name in sorted(config.profiles):
                 print(name)
@@ -257,7 +280,15 @@ def main(argv: list[str] | None = None) -> int:
 
             if config.default_profile and not os.environ.get("DEVWHO_PROFILE"):
                 compile_profile(config.profiles[config.default_profile], os.environ)
-            print(render_init(args.shell, config.path, bool(config.default_profile)), end="")
+            print(
+                render_init(
+                    args.shell,
+                    config.path,
+                    bool(config.default_profile),
+                    config.shortcut_profile if config.source_format == "dotenv" else None,
+                ),
+                end="",
+            )
             return 0
         if args.command == "exec":
             child = args.argv[1:] if args.argv[:1] == ["--"] else args.argv

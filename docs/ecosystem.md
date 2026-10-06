@@ -9,7 +9,7 @@ There are two independent parts to that goal:
 | Part | How it works | Status |
 |---|---|---|
 | **Native environment convention** | An application reads the same small set of `DEVWHO_*` variables and selects its own configured account. Any launcher can provide those variables. | Proposed; no native application integration is shipped here. |
-| **Compatibility core** | DevWho converts a saved profile into the interfaces existing applications already understand, such as Git runtime configuration and `GH_CONFIG_DIR`. | Implemented in Python; complete Go, Rust, and Bash alternatives are planned. |
+| **Compatibility core** | DevWho converts a saved profile into the interfaces existing applications already understand, such as Git runtime configuration and `GH_CONFIG_DIR`. | Independent Python, Go, Rust, and Bash implementations follow the shared contract. |
 
 An application supporting the convention does not need to import a Python module, install DevWho, read DevWho's TOML file, or call a daemon. A user of the compatibility core will eventually choose **one implementation** suitable for their machine; they will not need all four languages installed.
 
@@ -27,9 +27,9 @@ Applications map that context to their own existing accounts. For example, `work
 
 We do not introduce a separate `DEVWHO_<APP>_USER` family, a universal token, or a shared credentials directory. Git author name and email are not universal login identifiers. More fields should be added only when a concrete consumer needs them and their cross-application meaning is clear.
 
-The [environment specification](../spec/environment-v1.md) defines spelling, validation, inheritance, missing values, precedence, and account-selection failures. **It is a draft.** Current v0.1 already exports the profile marker; future native consumers can read it directly. Actual support requires an application's own account mapping and normal authentication, not merely a marker in the environment.
+The [environment specification](../spec/environment-v1.md) defines spelling, validation, inheritance, missing values, precedence, and account-selection failures. **It is a draft.** All current cores export the profile marker; native consumers can read it directly. Actual support requires an application's own account mapping and normal authentication, not merely a marker in the environment.
 
-One stable selector does not need a companion version variable. Keep its meaning stable, review extensions independently, and retain configuration-file versions only where a parser needs them. Neither TOML nor Python is required to supply the marker: an ordinary dotenv-aware launcher can load `DEVWHO_PROFILE=work`. The current core still reads TOML; optional dotenv loading is a separate [input-format proposal](configuration-formats.md), not an implemented feature.
+One stable selector does not need a companion version variable. Keep its meaning stable, review extensions independently, and retain configuration-file versions only where a parser needs them. Neither TOML nor Python is required to supply the marker: an ordinary dotenv-aware launcher can load `DEVWHO_PROFILE=work`. All current cores read complete TOML profiles and support explicit [literal dotenv input](../spec/dotenv-v1.md); dotenv selects one generic-environment profile and does not merge with TOML.
 
 ## How existing tools work today
 
@@ -52,21 +52,18 @@ Proposed native support
 
 These application-specific variables are compatibility outputs, not additions to the proposed shared convention. The core preserves unrelated settings, including proxy variables. It does not repeatedly rewrite repository or global configuration.
 
-Native and adapted tools can coexist in one terminal. A future core can publish the shared convention and keep the existing adapters for applications that still need them. Removing an adapter requires actual consumer support and a migration path, not merely publishing a specification.
+Native and adapted tools can coexist in one terminal. A launcher can provide the shared convention while existing adapters continue to serve applications that still need them. Removing an adapter requires actual consumer support and a migration path, not merely publishing a specification.
 
-## Python is an implementation choice
+## The compatibility core has multiple implementations
 
-The current Python implementation requires Python 3.11+. A zipapp bundles the application, not the Python interpreter. Users without Python cannot run it today.
-
-Go, Rust, and Bash are planned as **independent implementations of the complete current compatibility core**. Each must read the same configuration, expose the same commands, and preserve the same switching and recovery behavior. They are not SDKs, frontends that invoke Python, or limited Git-name switchers.
-
-Go and Rust will target downloadable executables so end users need neither Python nor a compiler. Bash will target a complete script implementation with its runtime requirements stated explicitly. In particular, it must handle the existing TOML syntax and state restoration correctly. See the [implementation plan](../implementations/README.md) for tradeoffs and tracked work.
+Python 3.11+ remains one option. Independent Go, Rust, and Bash cores now implement the same compatibility contract, so users can choose one core for their machine. Go and Rust executables run without Python or a compiler; Bash requires Bash 3.2+, jq 1.6+, and Perl 5.18+. See the [implementation guide](../implementations/README.md) for source builds, CI artifacts, checksums, and current platform evidence. CI downloads require GitHub sign-in; artifacts are development builds, and there is no tagged release. The optional Go configuration frontend provides English/Chinese forms and writes the shared TOML configuration. It does not change shell identity.
 
 The [compatibility contract](../spec/compatibility-core-v1.md) is separate from the native environment draft. Ports can deliver Python-free use of today's tools without waiting for applications to adopt the future convention.
 
 ## What can I do now?
 
-- **Use DevWho:** follow [Getting started](getting-started.md); Python is currently required.
-- **Work on a Python-free core:** choose a [full implementation task](../implementations/README.md) and use the common compatibility contract.
+- **Use DevWho:** follow [Getting started](getting-started.md) and choose one [core implementation](../implementations/README.md).
+- **Use the configuration form:** see the optional [configuration frontend](configuration-ui.md).
+- **Add native support to your application:** review the draft; the repository includes a reference consumer example, but it has no claim of third-party adoption.
 - **Add native support to your application:** review the draft with us first. Use your language's environment API; no DevWho SDK is required. Resolve the profile through your own account configuration and verify authentication normally.
 - **Propose a new shared variable:** explain its meaning across more than one application, its missing-value behavior, and how it avoids carrying secrets or creating conflicting sources of truth.

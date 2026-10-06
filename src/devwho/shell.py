@@ -26,7 +26,9 @@ def render_patch(patch: EnvironmentPatch, state: dict | None, shell: str) -> str
     return "\n".join(lines) + "\n"
 
 
-def render_init(shell: str, config_path: Path, has_default: bool) -> str:
+def render_init(
+    shell: str, config_path: Path, has_default: bool, env_profile: str | None = None
+) -> str:
     # Pin the interpreter and package entry point; changing PATH cannot redirect
     # the shell's transition engine to a different executable.
     archive = Path(sys.argv[0]).resolve()
@@ -39,9 +41,10 @@ def render_init(shell: str, config_path: Path, has_default: bool) -> str:
         [
             sys.executable,
             str(launcher),
-            "--config",
+            "--env-file" if env_profile else "--config",
             str(config_path),
         ]
+        + (["--env-profile", env_profile] if env_profile else [])
     )
     if shell == "bash":
         writable = r"""  local __devwho_decl __devwho_flags

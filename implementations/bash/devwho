@@ -1,0 +1,24 @@
+#!/usr/bin/perl
+# Transport launcher only. Capture the OS environment before Bash normalizes
+# special variables, then run this implementation's Bash/jq compatibility core.
+use strict;use warnings;
+use Cwd qw(abs_path);use File::Basename qw(dirname);
+use Encode qw(decode FB_CROAK);
+use File::Temp qw(tempfile);use Fcntl qw(F_SETFD);use JSON::PP;
+my $self=abs_path($0);
+my($fh,$path)=tempfile('devwho-env-XXXXXXXX',DIR=>'/tmp',UNLINK=>1);
+unlink $path or die "devwho: cannot secure environment transport\n";
+my %original;
+my $ok=eval { for my $key (keys %ENV) {
+ my $value=$ENV{$key};
+ my $name=decode('utf8',$key,FB_CROAK); my $text=decode('utf8',$value,FB_CROAK);
+ die 'unicode' if ($name.$text) =~ /[\x{D800}-\x{DFFF}]|[^\x{0}-\x{10FFFF}]/;
+ $original{$name}=$text;
+} 1 };
+unless($ok){print STDERR "devwho: invalid UTF-8 environment transport\n";exit 1}
+binmode $fh;print $fh JSON::PP->new->utf8->encode(\%original);
+seek($fh,0,0) or die "devwho: cannot rewind environment transport\n";
+fcntl($fh,F_SETFD,0) or die "devwho: cannot inherit environment transport\n";
+my $fd=fileno($fh);
+exec '/bin/bash',dirname($self).'/devwho.bash','--capture-fd',"$fd",'--launcher',$self,@ARGV;
+die "devwho: cannot start Bash core\n";

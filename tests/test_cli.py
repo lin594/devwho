@@ -8,7 +8,6 @@ import os
 from pathlib import Path
 import shutil
 import subprocess
-import sys
 import tempfile
 import unittest
 import zipfile
@@ -17,7 +16,7 @@ from scripts.build_zipapp import ARCHIVE_NAME, build
 
 
 ROOT = Path(__file__).resolve().parents[1]
-DEVWHO = ROOT / "bin" / "devwho"
+DEVWHO = Path(os.environ.get("DEVWHO_TEST_EXECUTABLE", ROOT / "bin" / "devwho")).resolve()
 
 
 def toml_string(value: str) -> str:
@@ -244,7 +243,7 @@ class CliTests(unittest.TestCase):
         self.assertEqual(target.read_text(encoding="utf-8"), "preserve me\n")
 
     def test_exec_preserves_child_status_and_returns_127_for_missing_command(self):
-        command = self.cli("exec", "work", "--", sys.executable, "-c", "raise SystemExit(7)")
+        command = self.cli("exec", "work", "--", "/bin/sh", "-c", "exit 7")
         self.assertEqual(command.returncode, 7)
         missing = self.cli("exec", "work", "--", str(self.root / "no-such-command"))
         self.assertEqual(missing.returncode, 127)

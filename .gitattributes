@@ -1,0 +1,3 @@
+# Preserve upstream license text byte-for-byte, including final blank lines.
+implementations/bash/vendor/LICENSE.TOML-Tiny whitespace=-blank-at-eof
+implementations/rust/licenses/** whitespace=-blank-at-eof

@@ -27,14 +27,16 @@ jobs:
         run: python -m pip install . build ruff
       - name: Format and lint
         run: |
-          ruff format --check src tests scripts
-          ruff check src tests scripts
+          ruff format --check src tests scripts conformance
+          ruff check src tests scripts conformance
       - name: Test real Bash and Zsh
         env:
           PYTHONPATH: src
           DEVWHO_TEST_BASH: /bin/bash
           DEVWHO_TEST_ZSH: /bin/zsh
         run: python -m unittest discover -s tests -v
+      - name: Shared executable contract
+        run: python conformance/run.py --executable bin/devwho --report python-contract.json
       - name: Build and inspect distributions
         run: |
           python -m build
@@ -50,3 +52,101 @@ jobs:
         with:
           name: devwho-${{ matrix.os }}-py${{ matrix.python }}
           path: dist/
+  cores:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - uses: actions/setup-go@v5
+        with:
+          go-version: stable
+          cache-dependency-path: implementations/go/go.sum
+      - name: Install runtime test tools
+        run: |
+          if [ "$RUNNER_OS" = Linux ]; then
+            sudo apt-get update
+            sudo apt-get install -y zsh jq perl
+          elif ! command -v jq; then
+            brew install jq
+          fi
+          rustup toolchain install stable --profile minimal
+      - name: Build and test Go core and configuration frontend
+        working-directory: implementations/go
+        run: |
+          go mod verify
+          go test ./...
+          go test -tags setup ./...
+          go vet ./...
+          go vet -tags setup ./...
+          go build -trimpath -o "$RUNNER_TEMP/devwho-go" .
+          go build -trimpath -tags setup -o "$RUNNER_TEMP/devwho-setup" .
+      - name: Build and test Rust core
+        working-directory: implementations/rust
+        run: |
+          cargo +stable test --locked
+          cargo +stable build --locked --release
+      - name: Bash implementation tests
+        run: python -m unittest discover -s implementations/bash/tests -v
+      - name: Native reference application
+        working-directory: examples/native-notes
+        run: |
+          test -z "$(gofmt -l .)"
+          go test ./...
+          go build -trimpath -o "$RUNNER_TEMP/native-notes" .
+      - name: Native consumer and ordinary producers
+        run: python conformance/native/run.py --consumer "$RUNNER_TEMP/native-notes" --producer bin/devwho --producer "$RUNNER_TEMP/devwho-go" --producer implementations/rust/target/release/devwho --producer implementations/bash/devwho
+      - name: Cross-core conformance and state interchange
+        env:
+          DEVWHO_TEST_BASH: /bin/bash
+          DEVWHO_TEST_ZSH: /bin/zsh
+        run: |
+          mkdir -p reports
+          python conformance/run.py --executable "$RUNNER_TEMP/devwho-go" --peer bin/devwho --peer implementations/rust/target/release/devwho --peer implementations/bash/devwho --report reports/go.json
+          python conformance/run.py --executable implementations/rust/target/release/devwho --peer bin/devwho --peer "$RUNNER_TEMP/devwho-go" --peer implementations/bash/devwho --report reports/rust.json
+          python conformance/run.py --executable implementations/bash/devwho --peer bin/devwho --peer "$RUNNER_TEMP/devwho-go" --peer implementations/rust/target/release/devwho --report reports/bash.json
+      - name: Package tested binaries and script distribution
+        run: |
+          python scripts/package_cores.py --go "$RUNNER_TEMP/devwho-go" --setup "$RUNNER_TEMP/devwho-setup" --rust implementations/rust/target/release/devwho
+          cd dist/cores
+          shasum -a 256 -c SHA256SUMS
+      - name: Runtime filesystem without Python or compilers
+        if: runner.os == 'Linux'
+        run: |
+          docker build -f conformance/Dockerfile -t devwho-runtime-check conformance
+          for core in go rust bash; do
+            docker run --rm --network none \
+              -v "$PWD/conformance:/checks:ro" \
+              -v "$PWD/build/core-packages/$core:/artifacts:ro" \
+              devwho-runtime-check /artifacts/devwho | tee "reports/$core-runtime.txt"
+          done
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: complete-cores-${{ matrix.os }}
+          path: |
+            dist/cores/
+            reports/
+  minimum-compilers:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.23.x'
+          cache-dependency-path: implementations/go/go.sum
+      - name: Minimum Go compiler
+        working-directory: implementations/go
+        run: |
+          go test ./...
+          go test -tags setup ./...
+      - name: Minimum Rust compiler
+        working-directory: implementations/rust
+        run: |
+          rustup toolchain install 1.85.0 --profile minimal
+          cargo +1.85.0 test --locked
