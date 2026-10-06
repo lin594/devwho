@@ -46,7 +46,7 @@ devwho config path
 
 Open the printed path in your usual text editor. The default is `~/.config/devwho/config.toml`; if you set `XDG_CONFIG_HOME` or `DEVWHO_CONFIG`, use the path printed by the command. `config init` refuses to overwrite an existing file.
 
-Replace the starter file with this example, using your real commit names and emails:
+For a new configuration, replace the starter file with this example, using your chosen commit names and emails. If the file already contains your profiles, keep them and only add or adjust the entries you need:
 
 ```toml
 version = 1

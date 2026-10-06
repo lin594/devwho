@@ -78,7 +78,7 @@ devwho config init
 devwho config path
 ```
 
-Open the printed file in your text editor. Replace its contents with the example below, then replace Jane's names and emails with the identities you use. These are commit details, not passwords or GitHub usernames. You can name the profiles anything you like.
+Open the printed file in your text editor. For a new configuration, replace the starter contents with the example below, then replace Jane's names and emails with the identities you use. If you already have profiles, keep them and add or adjust only the profiles you need. These are commit details, not passwords or GitHub usernames. You can name the profiles anything you like.
 
 ```toml
 version = 1
