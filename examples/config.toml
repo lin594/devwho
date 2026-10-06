@@ -1,0 +1,31 @@
+version = 1
+
+# Optional local preference. Keep private machine-specific choices out of
+# shared examples if they identify a person or organization.
+# [settings]
+# default_profile = "personal"
+
+[profiles.personal.git]
+name = "Jane Doe"
+email = "jane.personal@example.test"
+
+[profiles.personal.env]
+TOOL_PROFILE = "personal"
+
+[profiles.work.git]
+name = "Jane Doe"
+email = "jane.work@example.test"
+
+[profiles.work.env]
+TOOL_PROFILE = "work"
+
+# Optional integrations. Uncomment and replace these paths/accounts with
+# values that exist on your machine before activating the profile.
+# [profiles.work.git_ssh]
+# identity_file = "~/.ssh/id_ed25519_work"
+# identities_only = true
+#
+# [profiles.work.github]
+# hostname = "github.com"
+# expected_user = "jane-work"
+# config_dir = "~/.config/devwho/github/work"
