@@ -14,5 +14,7 @@
 - Effective Git identity in `current --verbose` and checksums covering all generated distributions.
 - Compatible shell activation argument parsing on Python 3.11.
 - Added a Chinese version of the contributing guide, security policy, and changelog.
+- Separated the draft native environment convention from the existing compatibility core, with bilingual specifications and complete Go/Rust/Bash implementation plans. These ports and native integrations are not implemented yet.
+- Defined a draft single-variable context interface and documented optional dotenv input separately from the current TOML format; dotenv loading is not implemented yet.
 
 PowerShell and VS Code identity integration are deferred experiments. No release tag or package registry publication is provided yet.

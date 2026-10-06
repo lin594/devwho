@@ -6,7 +6,7 @@
 
 [![CI](https://github.com/lin594/devwho/actions/workflows/ci.yml/badge.svg)](https://github.com/lin594/devwho/actions/workflows/ci.yml) · [MIT 许可证](LICENSE) · [文档](docs/zh-CN/README.md) · [获取帮助](https://github.com/lin594/devwho/issues)
 
-DevWho 是一个小型命令行工具，适合需要使用多个开发身份的人：例如区分个人和工作账号、不同客户项目，或多人共用一台开发电脑。把每个身份保存一次，然后为当前终端选择要使用的身份。
+DevWho 帮助需要使用多个开发身份的人：例如区分个人和工作账号、不同客户项目，或多人共用一台开发电脑。把每个身份保存一次，然后为当前终端选择要使用的身份。
 
 下一次 Git 提交会使用所选的姓名和邮箱。你也可以为 Git 选择 SSH 密钥、为 GitHub CLI 选择账号配置，并设置其他工具使用的环境变量。现有项目目录和已安装的工具都不需要移动或重新安装。
 
@@ -20,6 +20,16 @@ DevWho 是一个小型命令行工具，适合需要使用多个开发身份的�
 | 某条命令需要特定工具配置。 | 为它指定一个身份配置，同时保留父终端原有状态。 |
 
 如果 Git 的目录条件配置 `includeIf` 已经解决了你的问题，就不一定需要 DevWho。DevWho 更适合按**当前终端由谁使用**来选择身份，而不是按仓库所在目录选择。[比较不同方案 →](docs/alternatives.md)
+
+## 统一的环境约定，以及面向现有工具的兼容层
+
+我们的目标是：选择一次身份上下文，让应用自行读取并使用，就像应用读取代理环境变量一样。原生支持的应用可以读取 `DEVWHO_PROFILE`，再映射到自己的账号。它们无需导入 Python 模块、读取版本变量，也无需为每个应用另造一套 DevWho 变量。目前这份[环境变量约定](spec/environment-v1.zh-CN.md)仍是**草案**。
+
+现在通过**兼容性 core**让现有工具可用：把身份配置转换成 Git 运行时配置、`GH_CONFIG_DIR` 等工具已有的接口。Python 是第一个实现。Go、Rust、Bash 都计划分别实现完整 core，让用户按自己的设备选择其中一种，也能覆盖没有 Python 的机器。
+
+[了解生态与兼容层的关系](docs/zh-CN/ecosystem.md) · [查看各实现的状态与路线](implementations/README.zh-CN.md)
+
+运行时约定与文件格式无关。当前 core 读取 TOML，同时[提议增加](docs/zh-CN/configuration-formats.md)简单的 dotenv 输入。原生应用只需读取最终环境，不必读取提供方的配置文件。
 
 ## 日常使用示例
 
@@ -39,17 +49,19 @@ unsetdev                 # 恢复切换前此终端的身份设置
 
 修改只会影响当前终端，以及之后从该终端启动的程序。其他终端和已经运行的应用仍使用各自原来的设置。在一个终端切换身份，**不会**切换已打开的 VS Code 窗口、Copilot 或浏览器登录账号。
 
-## 需要什么？
+## 当前版本需要什么？
 
 | 条件 | 用途 |
 |---|---|
 | Linux、WSL 或 macOS，以及 Bash 或 Zsh | 使用终端集成。[CI](https://github.com/lin594/devwho/actions/workflows/ci.yml) 覆盖 Ubuntu/macOS 与 Python 3.11/3.13 组合；WSL 也经过本地检查。 |
-| Python **3.11 或更新版本** | 运行 DevWho，包括单文件版本。 |
+| Python **3.11 或更新版本** | 运行目前可用的 Python core，包括其单文件版本。 |
 | Git **2.31 或更新版本** | 按本指南切换 Git 身份。 |
 | GitHub CLI（`gh`） | 可选：仅在使用 GitHub CLI 账号配置或在线身份检查时需要。 |
 | OpenSSH 和已有密钥 | 可选：仅在为 Git 选择 SSH 密钥时需要。 |
 
 运行时**不需要第三方 Python 依赖**。安装步骤使用你已有的 Python；不需要 pipx、Node.js 或 Docker。Windows PowerShell 集成仍在计划中；目前 Windows 用户请使用 WSL。
+
+**没有安装 Python？** 计划中的 Go/Rust 可执行文件和完整 Bash core 将用于解除这一依赖，但目前尚未提供，请关注[实现任务](implementations/README.zh-CN.md)。未来的原生环境变量约定本身不要求 Python。
 
 ## 开始使用
 
@@ -146,6 +158,8 @@ Git **提交身份信息**、**推送凭据**和 **GitHub CLI 登录**是彼此�
 | 使用已有 GitHub CLI 登录或 Git SSH 密钥 | [账号与身份验证](docs/zh-CN/accounts.md) |
 | 解决“找不到命令”、登录不匹配或恢复错误 | [故障排查](docs/zh-CN/troubleshooting.md) |
 | 查询命令和 TOML 配置项 | [参考手册](docs/zh-CN/reference.md) |
+| 理解原生环境约定与当前兼容层 | [生态设计](docs/zh-CN/ecosystem.md) |
+| 参与完整的无 Python 依赖实现 | [Core 的多语言实现](implementations/README.zh-CN.md) |
 | 报告问题或参与改进 | [贡献指南](CONTRIBUTING.zh-CN.md) |
 
 更多信息：[文档索引](docs/zh-CN/README.md) · [更新记录](CHANGELOG.zh-CN.md) · [安全报告](SECURITY.zh-CN.md) · [MIT 许可证](LICENSE)

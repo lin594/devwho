@@ -4,6 +4,8 @@
 
 本页用于查找配置项和精确行为。首次设置请从[入门指南](getting-started.md)开始。
 
+本页说明**已经实现的兼容性 core**，目前使用 Python 编写。[原生环境变量约定](../../spec/environment-v1.zh-CN.md)是另一份草案；计划中的[完整 core 移植](../../implementations/README.zh-CN.md)需要保留下述命令和配置行为。
+
 ## 命令
 
 | 命令 | 用途 |

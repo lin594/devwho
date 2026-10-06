@@ -6,7 +6,7 @@
 
 [![CI](https://github.com/lin594/devwho/actions/workflows/ci.yml/badge.svg)](https://github.com/lin594/devwho/actions/workflows/ci.yml) · [MIT license](LICENSE) · [Documentation](docs/README.md) · [Get help](https://github.com/lin594/devwho/issues)
 
-DevWho is a small command-line tool for people who use more than one developer identity: personal and work accounts, client projects, or two people sharing a development machine. Save each identity once, then choose it for the terminal you are using.
+DevWho helps people who use more than one developer identity: personal and work accounts, client projects, or two people sharing a development machine. Save each identity once, then choose it for the terminal you are using.
 
 Your next Git commit uses the selected name and email. You can also choose a Git SSH key, a GitHub CLI account configuration, and other tools' environment settings. Your existing project folders and installed tools stay in place.
 
@@ -20,6 +20,16 @@ Your next Git commit uses the selected name and email. You can also choose a Git
 | A command needs a particular tool configuration. | Run it with a profile while keeping the parent terminal as it was. |
 
 If Git's directory-based `includeIf` already solves your problem, you may not need DevWho. It is most useful when identity depends on **who is using this terminal**, rather than where a repository lives. [Compare approaches →](docs/alternatives.md)
+
+## A shared convention, with compatibility for today's tools
+
+The goal is to choose a context once and have applications use it, much like applications read proxy environment variables. Native applications would read `DEVWHO_PROFILE` and map the context to their own accounts. They would not need a Python module, a version variable, or a separate DevWho variable for every application. This [environment convention](spec/environment-v1.md) is currently a **draft**.
+
+Today, a **compatibility core** makes existing tools work by translating profiles into Git runtime configuration, `GH_CONFIG_DIR`, and other existing interfaces. Python is the first implementation. Complete Go, Rust, and Bash implementations are planned so users can choose one core that fits their machine, including machines without Python.
+
+[How the ecosystem fits together](docs/ecosystem.md) · [Implementation status and roadmap](implementations/README.md)
+
+The runtime convention is independent of file formats. The current core reads TOML; a simple dotenv input is [proposed](docs/configuration-formats.md) alongside it. Native applications need only the resulting environment, not the producer's files.
 
 ## What daily use looks like
 
@@ -39,17 +49,19 @@ unsetdev                 # Restore this terminal's identity from before switchin
 
 Only this terminal and programs subsequently launched from it receive the change. Other terminals and already-running applications keep their own settings. Switching in a terminal does **not** switch an existing VS Code window, Copilot, or browser login.
 
-## What you need
+## What you need today
 
 | Requirement | When you need it |
 |---|---|
 | Linux, WSL, or macOS with Bash or Zsh | To use the terminal integration. Ubuntu/macOS and Python 3.11/3.13 run in [CI](https://github.com/lin594/devwho/actions/workflows/ci.yml); WSL is also checked locally. |
-| Python **3.11+** | To run DevWho, including its single-file version. |
+| Python **3.11+** | To run the currently available Python core, including its single-file version. |
 | Git **2.31+** | To follow this guide and switch Git identity. |
 | GitHub CLI (`gh`) | Optional: only for GitHub CLI account profiles and online identity checks. |
 | OpenSSH and an existing key | Optional: only for selecting a Git SSH key. |
 
 There are **no third-party Python dependencies at runtime**. The installation below uses your existing Python; pipx, Node.js, and Docker are not required. Windows PowerShell integration is planned; Windows users should use WSL for now.
+
+**No Python installed?** The planned Go/Rust executables and full Bash core are intended to remove that requirement. They are not available yet; follow the [implementation tasks](implementations/README.md). Python is not a requirement of the proposed native environment convention.
 
 ## Try it
 
@@ -146,6 +158,8 @@ When two people share the same working copy, agree on how to hand over uncommitt
 | Reuse GitHub CLI logins or Git SSH keys | [Accounts and authentication](docs/accounts.md) |
 | Fix `command not found`, login mismatches, or restore errors | [Troubleshooting](docs/troubleshooting.md) |
 | Look up a command or TOML setting | [Reference](docs/reference.md) |
+| Understand the native convention and current adapters | [Ecosystem design](docs/ecosystem.md) |
+| Help build a complete Python-free implementation | [Core implementations](implementations/README.md) |
 | Report a bug or help improve DevWho | [Contributing](CONTRIBUTING.md) |
 
 More: [documentation index](docs/README.md) · [changes](CHANGELOG.md) · [security reports](SECURITY.md) · [MIT license](LICENSE)

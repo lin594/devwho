@@ -4,6 +4,8 @@
 
 Use this page to look up a setting or precise behavior. For your first setup, start with [Getting started](getting-started.md).
 
+This describes the **implemented compatibility core**, currently written in Python. The [native environment convention](../spec/environment-v1.md) is a separate draft; planned [full core ports](../implementations/README.md) must preserve the commands and configuration below.
+
 ## Commands
 
 | Command | Purpose |

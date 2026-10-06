@@ -3,6 +3,8 @@
 **Status:** accepted for v0.1 design  
 **Date:** 2026-10-06
 
+This page describes the **current compatibility core**. The separate [ecosystem design](ecosystem.md) and [environment convention draft](../spec/environment-v1.md) describe future native consumers. Python is the current implementation language, not a requirement for that convention. Full Go, Rust, and Bash ports target the [same core contract](../spec/compatibility-core-v1.md).
+
 ## Decision
 
 DevWho treats a developer profile as configuration that compiles into an environment patch. The patch is applied at a shell boundary or to a child process. DevWho does not own Git, SSH, GitHub CLI, or other developer tools, and it does not maintain machine-global active identity.

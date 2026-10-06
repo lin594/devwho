@@ -9,10 +9,12 @@ Thanks for taking an interest in DevWho. Small, focused contributions are welcom
 - **Found a problem?** Search the [existing issues](https://github.com/lin594/devwho/issues) first. If it has not been reported, open an issue with what you expected, what happened, and a short way to reproduce it. Use fictional identities and remove tokens, private paths, and other sensitive details.
 - **Improving the docs?** Fix the relevant Markdown page or example and open a pull request. For documentation-only changes, check that links work and commands or configuration examples are accurate. You do not need to add tests just to add tests for prose.
 - **Changing code?** Start with a focused issue or explain the problem in your pull request. Add or update tests for behavior changes, especially shell transitions, Git identity, and child-process execution.
+- **Building a complete core in Go, Rust, or Bash?** See the [implementation tasks](implementations/README.md) and [common compatibility contract](spec/compatibility-core-v1.md). These are full alternatives to the Python core, with the same profiles and commands and no Python at runtime. A wrapper or SDK does not complete a port.
+- **Adding native application support?** Review the [environment convention draft](spec/environment-v1.md). Consumers read shared environment variables using their own language; they do not need a DevWho library or the core's profile parser.
 
-## Prepare your environment
+## Develop the current Python core
 
-DevWho requires Python 3.11 or newer, Git 2.31 or newer, Bash, and Zsh for the full shell integration suite. Create a virtual environment and install the project plus its development tools:
+The current Python implementation requires Python 3.11 or newer, Git 2.31 or newer, Bash, and Zsh for the full shell integration suite. Other implementations will document their own build requirements and run the same conformance cases. Create a virtual environment for Python development and install the project plus its development tools:
 
 ```bash
 python3 -m venv .venv

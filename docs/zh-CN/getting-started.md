@@ -4,6 +4,8 @@
 
 本指南将带你完成安装，并检查 Git 将使用的身份信息。首次运行不需要 GitHub 登录，也不需要创建测试提交。
 
+这些步骤安装的是**目前可用的 Python 兼容性 core**。完整 Go、Rust、Bash 替代实现仍在[计划中](../../implementations/README.zh-CN.md)；独立的[原生环境变量约定](../../spec/environment-v1.zh-CN.md)还是草案，应用接入它无需依赖 Python 库。
+
 ## 检查终端和工具
 
 请在 Linux、WSL 或 macOS 上使用 Bash 或 Zsh。Windows 用户请打开 WSL 终端，并在 WSL 中完成全部步骤。v0.1 不支持原生 PowerShell 或 VS Code 账号切换。

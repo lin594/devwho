@@ -1,6 +1,16 @@
 # Project status
 
-DevWho is a Python command-line project for per-shell developer identity. Its source is public; version 0.1.0 has no tagged release or package registry publication yet.
+DevWho is a project for per-shell developer context: a proposed shared environment convention and a compatibility core for existing tools. Only the Python core is implemented today. Its source is public; version 0.1.0 has no tagged release or package registry publication yet.
+
+## Separate tracks
+
+| Track | Current status |
+|---|---|
+| [Native environment convention](../spec/environment-v1.md) | Draft using only `DEVWHO_PROFILE`, which the current core already exports. Native app mappings/integrations are not shipped or claimed. |
+| Python compatibility core | Implemented in `src/devwho`, with Bash/Zsh and Git/gh adapters. |
+| [Full Go, Rust, and Bash cores](../implementations/README.md) | Planned independent implementations of the same behavior; no working ports or downloadable binaries yet. |
+| Shared executable conformance suite | Contract documented; language-neutral fixtures/runner still to be implemented. Existing Python regression tests are not a substitute. |
+| [Dotenv core input](configuration-formats.md) | Proposed optional input. The current core still accepts TOML only; ordinary third-party dotenv launchers can already supply a context variable to future native consumers. |
 
 ## What DevWho provides
 
@@ -10,6 +20,6 @@ Activation and inspection do not rewrite Git or SSH configuration, move credenti
 
 ## Platform and release status
 
-The project requires Python 3.11 or newer. Linux/WSL Bash and Zsh have local integration coverage. GitHub Actions is configured for Ubuntu and macOS with Python 3.11 and 3.13; check the [workflow runs](https://github.com/lin594/devwho/actions/workflows/ci.yml) for hosted results. A configured workflow matrix is not itself evidence that every job has passed.
+The current implementation requires Python 3.11 or newer. Linux/WSL Bash and Zsh have local integration coverage. GitHub Actions is configured for Ubuntu and macOS with Python 3.11 and 3.13; check the [workflow runs](https://github.com/lin594/devwho/actions/workflows/ci.yml) for hosted results. A configured workflow matrix is not itself evidence that every job has passed.
 
 Windows PowerShell and editor identity integration are outside the supported v0.1 interface. No release, tag, or package publication is implied by the version in `pyproject.toml`.
