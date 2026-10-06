@@ -17,21 +17,21 @@ CI artifacts are development builds, not tagged releases. Their archive names an
 
 ### Install the prebuilt Go core on Linux or macOS
 
-1. Open the repository’s [Actions workflow](https://github.com/lin594/devwho/actions/workflows/ci.yml), choose a successful `complete-cores-ubuntu-latest` or `complete-cores-macos-latest` run, then download its `complete-cores-[OS]` artifact. Extract the downloaded GitHub artifact ZIP.
+1. Open the repository’s [Actions workflow](https://github.com/lin594/devwho/actions/workflows/ci.yml), choose a successful CI run for the desired commit, then download its `complete-cores-[OS]` artifact. Extract the downloaded GitHub artifact ZIP.
 2. In the extracted directory, verify the archive checksum before unpacking it:
 
    ```sh
-   cd /path/to/extracted-artifact
+   cd /path/to/extracted-artifact/dist/cores
    sha256sum -c SHA256SUMS       # Linux
    shasum -a 256 -c SHA256SUMS  # macOS
    ```
 
-3. Unpack the Go archive for your runner. Linux x86-64 uses `devwho-go-linux-x86_64.tar.gz`; macOS uses the exact `devwho-go-macos-ARCH.tar.gz` filename listed in `SHA256SUMS` for that runner. For example:
+3. Unpack the Go archive for your runner. Linux x86-64 uses `devwho-go-linux-x86_64.tar.gz`; macOS uses the exact `devwho-go-darwin-ARCH.tar.gz` filename listed in `SHA256SUMS` for that runner. For example:
 
    ```sh
    tar -xzf devwho-go-linux-x86_64.tar.gz
    cd devwho-go-linux-x86_64
-   # On macOS, substitute its matching archive and cd into devwho-go-macos-ARCH.
+   # On macOS, substitute its matching archive and cd into devwho-go-darwin-ARCH.
    ```
 
    The archive contains `devwho` and the optional `devwho-setup` standalone editor. Install either or both into a user-owned directory:

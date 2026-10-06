@@ -17,21 +17,21 @@ CI 产物是开发构建，不是正式标签发布。每次工作流运行会�
 
 ### 在 Linux 或 macOS 安装预编译 Go core
 
-1. 打开仓库的 [Actions 工作流](https://github.com/lin594/devwho/actions/workflows/ci.yml)，选择成功的 `complete-cores-ubuntu-latest` 或 `complete-cores-macos-latest` 运行，然后下载其中的 `complete-cores-[OS]` artifact。解压下载的 GitHub artifact ZIP。
+1. 打开仓库的 [Actions 工作流](https://github.com/lin594/devwho/actions/workflows/ci.yml)，选择对应提交成功的 CI 运行，再下载 `complete-cores-ubuntu-latest` 或 `complete-cores-macos-latest` artifact。解压下载的 GitHub artifact ZIP。
 2. 在解压后的目录中，先校验归档文件，再解包：
 
    ```sh
-   cd /path/to/extracted-artifact
+   cd /path/to/extracted-artifact/dist/cores
    sha256sum -c SHA256SUMS       # Linux
    shasum -a 256 -c SHA256SUMS  # macOS
    ```
 
-3. 解包与 runner 对应的 Go 归档。Linux x86-64 使用 `devwho-go-linux-x86_64.tar.gz`；macOS 请使用 `SHA256SUMS` 中该 runner 对应的确切 `devwho-go-macos-ARCH.tar.gz` 文件名。例如：
+3. 解包与 runner 对应的 Go 归档。Linux x86-64 使用 `devwho-go-linux-x86_64.tar.gz`；macOS 请使用 `SHA256SUMS` 中该 runner 对应的确切 `devwho-go-darwin-ARCH.tar.gz` 文件名。例如：
 
    ```sh
    tar -xzf devwho-go-linux-x86_64.tar.gz
    cd devwho-go-linux-x86_64
-   # macOS 请替换为匹配的归档名，并 cd 到 devwho-go-macos-ARCH 目录。
+   # macOS 请替换为匹配的归档名，并 cd 到 devwho-go-darwin-ARCH 目录。
    ```
 
    归档中包含 `devwho` 和可选的独立配置编辑器 `devwho-setup`。可将其中一个或两者安装到用户目录：
@@ -44,7 +44,7 @@ CI 产物是开发构建，不是正式标签发布。每次工作流运行会�
    ```
 
    如果准备手动编辑 TOML，可以跳过安装 `devwho-setup`。PATH 命令只对当前终端生效；如需在新终端中使用，请把该目录加入 shell 启动文件。用户机器不需要编译器。
-4. 可选：运行 `devwho-setup configure` 并按表单填写 profile。然后初始化 shell 并激活身份：
+4. 可选：运行 `devwho-setup --language zh-CN configure` 并按表单填写 profile。然后初始化 shell 并激活身份：
 
    ```sh
    eval "$(devwho init bash)"  # 使用 Zsh 时将 `bash` 换成 `zsh`

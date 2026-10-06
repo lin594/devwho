@@ -16,7 +16,7 @@ After saving, run `setdev PROFILE` in an initialized terminal. The editor does n
 
 ## Files, backups and other editors
 
-The default file follows the core's configuration-path rules; `--config PATH` chooses another file. Saves validate the full profile schema, compare the revision originally read, and atomically write a private file. A sibling `.devwho-backups/` directory retains the exact previous bytes. Comments and formatting are normalized in the new file; advanced values and Git pair ordering remain intact.
+The default file follows the core's configuration-path rules; `--config PATH` chooses another file. Saves validate the full profile schema, compare the revision originally read, and atomically write a private file. A sibling `.devwho-backups/` directory retains the exact previous bytes. The new file uses normalized formatting and drops comments; advanced values and Git pair ordering remain intact.
 
 Two DevWho editors cannot silently overwrite each other's saved revision. External editors that ignore the cooperative lock can still race; close them or reread before saving. Configuration symlink writes are refused.
 

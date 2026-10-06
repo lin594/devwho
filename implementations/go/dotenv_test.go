@@ -60,13 +60,32 @@ func TestDotenvExportRoundtripAndLossRejection(t *testing.T) {
 	}
 }
 func TestDotenvShellPinAndNoDefault(t *testing.T) {
-	path := filepath.Join(t.TempDir(), "profile.env")
+	root := t.TempDir()
+	source := filepath.Join(root, "source")
+	if e := os.Mkdir(source, 0700); e != nil {
+		t.Fatal(e)
+	}
+	path := filepath.Join(source, "profile.env")
 	if e := os.WriteFile(path, []byte("DEVWHO_PROFILE=work\nVALUE='literal $HOME'\n"), 0600); e != nil {
 		t.Fatal(e)
 	}
-	cfg, e := loadDotenv(path, "", Env{})
+	// Exercise canonical source pinning on every platform, including macOS
+	// where the temporary-directory prefix itself may be a symlink.
+	alias := filepath.Join(root, "source-alias")
+	if e := os.Symlink(source, alias); e != nil {
+		t.Fatal(e)
+	}
+	selected := filepath.Join(alias, "profile.env")
+	canonical, e := filepath.EvalSymlinks(path)
 	if e != nil {
 		t.Fatal(e)
+	}
+	cfg, e := loadDotenv(selected, "", Env{})
+	if e != nil {
+		t.Fatal(e)
+	}
+	if cfg.Path != canonical || !filepath.IsAbs(cfg.Path) {
+		t.Fatalf("dotenv source path: got %q, want canonical %q", cfg.Path, canonical)
 	}
 	if cfg.Default != "" || cfg.Shortcut != "work" || !cfg.EnvFile {
 		t.Fatal("dotenv lifecycle metadata")
@@ -76,8 +95,8 @@ func TestDotenvShellPinAndNoDefault(t *testing.T) {
 		if e != nil {
 			t.Fatal(e)
 		}
-		if !strings.Contains(text, "--env-file "+quote(path)+" --env-profile work") || strings.Contains(text, "__devwho_bootstrap") {
-			t.Fatal("init source pin/default")
+		if !strings.Contains(text, "--env-file "+quote(canonical)+" --env-profile work") || strings.Contains(text, "__devwho_bootstrap") {
+			t.Fatalf("%s init must pin canonical source %q and profile without bootstrap", shell, canonical)
 		}
 	}
 	// Drive a fresh build of the actual CLI through both shell adapters.
@@ -91,7 +110,7 @@ func TestDotenvShellPinAndNoDefault(t *testing.T) {
 		if e != nil {
 			continue
 		}
-		script := "set -e\neval \"$(" + quote(exe) + " --env-file " + quote(path) + " init " + shell + ")\"\n[ \"${DEVWHO_PROFILE-missing}\" = missing ]\nsetdev\n[ \"$VALUE\" = 'literal $HOME' ]\ncd /\nunsetdev\n[ \"${VALUE-missing}\" = missing ]\n"
+		script := "set -e\neval \"$(" + quote(exe) + " --env-file " + quote(selected) + " init " + shell + ")\"\n[ \"${DEVWHO_PROFILE-missing}\" = missing ]\nsetdev\n[ \"$VALUE\" = 'literal $HOME' ]\ncd /\nunsetdev\n[ \"${VALUE-missing}\" = missing ]\n"
 		args := []string{"--noprofile", "--norc", "-c", script}
 		if shell == "zsh" {
 			args = []string{"-f", "-c", script}
