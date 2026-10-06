@@ -297,7 +297,7 @@ class TransitionTests(unittest.TestCase):
                 transition(cfg, "a", env)
             self.assertIn(key, str(raised.exception))
             self.assertNotIn("private-value", str(raised.exception))
-        transition(cfg, "a", {"GH_TOKEN": "", "GIT_AUTHOR_NAME": ""})
+        transition(cfg, "a", {"GH_TOKEN": "", "GIT_AUTHOR_NAME": "", "HOME": "/example"})
 
     def test_unknown_profile_and_invalid_state_atomic(self):
         cfg = config(profile("a", env={"VALUE": "a"}))
@@ -342,6 +342,86 @@ class TransitionTests(unittest.TestCase):
             )
             self.assertEqual(compiled.values["GH_CONFIG_DIR"], directory + "/github/$HOME")
             self.assertEqual(compiled.values["GH_HOST"], "example.com")
+
+    def test_semantic_paths_reject_relative_paths_atomically(self):
+        with tempfile.TemporaryDirectory() as directory:
+            cfg = config(
+                profile("good", env={"VALUE": "good"}),
+                profile("ssh", git_ssh={"identity_file": "relative-key"}),
+                profile(
+                    "github", github={"config_dir": "relative-gh", "expected_user": "jane-work"}
+                ),
+            )
+            env, state = activate(cfg, "good", {"HOME": directory})
+            saved_env, saved_state = deepcopy(env), deepcopy(state)
+            for name, field in (("ssh", "git_ssh.identity_file"), ("github", "github.config_dir")):
+                with self.subTest(name=name), self.assertRaises(TransitionError) as raised:
+                    transition(cfg, name, env, state)
+                self.assertIn(field, str(raised.exception))
+                self.assertNotIn("relative-", str(raised.exception))
+                self.assertEqual((env, state), (saved_env, saved_state))
+
+    def test_semantic_paths_use_restored_and_destination_home(self):
+        with tempfile.TemporaryDirectory() as directory:
+            homes = [Path(directory) / name for name in ("original", "previous", "destination")]
+            for home in homes:
+                (home / ".ssh").mkdir(parents=True)
+                (home / ".ssh" / "key").touch()
+            original, previous, destination = map(str, homes)
+            cfg = config(
+                profile("a", env={"HOME": previous}),
+                profile(
+                    "b",
+                    git_ssh={"identity_file": "~/.ssh/key"},
+                    github={"config_dir": "~/github", "expected_user": "jane-work"},
+                ),
+                profile(
+                    "c",
+                    env={"HOME": destination},
+                    git_ssh={"identity_file": "~/.ssh/key"},
+                    github={"config_dir": "~/github", "expected_user": "jane-work"},
+                ),
+            )
+            env, state = activate(cfg, "a", {"HOME": original})
+            env, state = activate(cfg, "b", env, state)
+            self.assertEqual(env["HOME"], original)
+            self.assertEqual(shlex.split(env["GIT_SSH_COMMAND"])[2], original + "/.ssh/key")
+            self.assertEqual(env["GH_CONFIG_DIR"], original + "/github")
+            env, state = activate(cfg, "c", env, state)
+            self.assertEqual(env["HOME"], destination)
+            self.assertEqual(shlex.split(env["GIT_SSH_COMMAND"])[2], destination + "/.ssh/key")
+            self.assertEqual(env["GH_CONFIG_DIR"], destination + "/github")
+            self.assertEqual(activate(cfg, None, env, state)[0], {"HOME": original})
+
+    def test_single_tilde_uses_effective_home(self):
+        compiled = compile_profile(
+            profile("a", github={"config_dir": "~", "expected_user": "jane-work"}),
+            {"HOME": "/example"},
+        )
+        self.assertEqual(compiled.values["GH_CONFIG_DIR"], "/example")
+
+    def test_tilde_path_with_unset_or_relative_effective_home_fails(self):
+        for values in ({"unset_env": ["HOME"]}, {"env": {"HOME": "relative-home"}}):
+            cfg = config(
+                profile(
+                    "a", github={"config_dir": "~/github", "expected_user": "jane-work"}, **values
+                )
+            )
+            with self.subTest(values=values), self.assertRaises(TransitionError):
+                transition(cfg, "a", {"HOME": "/original"})
+
+    def test_previous_profile_token_is_not_removed_to_avoid_conflict(self):
+        cfg = config(
+            profile("a", env={"GH_TOKEN": "fictional-token"}),
+            profile("b", github={"config_dir": "/fictional/github", "expected_user": "jane-work"}),
+        )
+        env, state = activate(cfg, "a", {})
+        before = deepcopy(state)
+        with self.assertRaises(TransitionError) as raised:
+            transition(cfg, "b", env, state)
+        self.assertEqual(str(raised.exception), "Conflicting environment variable: GH_TOKEN")
+        self.assertEqual(state, before)
+        self.assertEqual(env["GH_TOKEN"], "fictional-token")
 
     def test_missing_ssh_identity_is_atomic_and_does_not_leak_path(self):
         with tempfile.TemporaryDirectory() as directory:

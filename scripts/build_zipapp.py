@@ -41,9 +41,17 @@ def build(output_dir: str | Path | None = None) -> Path:
         )
     archive.chmod(0o755)
 
-    digest = hashlib.sha256(archive.read_bytes()).hexdigest()
     sums = output / "SHA256SUMS"
-    sums.write_text(f"{digest}  {ARCHIVE_NAME}\n", encoding="ascii")
+    stem = ARCHIVE_NAME.removesuffix(".pyz")
+    artifacts = [archive, output / (stem + ".tar.gz"), *output.glob(stem + "-*.whl")]
+    sums.write_text(
+        "".join(
+            f"{hashlib.sha256(item.read_bytes()).hexdigest()}  {item.name}\n"
+            for item in sorted(artifacts)
+            if item.is_file()
+        ),
+        encoding="ascii",
+    )
     return archive
 
 

@@ -40,6 +40,12 @@ jobs:
           python -m build
           python scripts/build_zipapp.py
           python dist/devwho-0.1.0.pyz --version
+          python -m pip install --force-reinstall --no-deps dist/*.whl
+          cd "$RUNNER_TEMP"
+          devwho --version
+      - name: Verify distribution checksums
+        working-directory: dist
+        run: shasum -a 256 -c SHA256SUMS
       - uses: actions/upload-artifact@v4
         with:
           name: devwho-${{ matrix.os }}-py${{ matrix.python }}

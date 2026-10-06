@@ -1,6 +1,6 @@
 # Open-source readiness
 
-Assessment: 2026-10-06. Version: 0.1.0, unreleased. **Linux/WSL core is locally validated; public release awaits hosted CI and the maintainer's publication decision.**
+Assessment: 2026-10-06. Version: 0.1.0, unreleased. This checklist describes the development branch. Source hosting does not constitute a tagged or packaged release. The [CI workflow](https://github.com/lin594/devwho/actions/workflows/ci.yml) records hosted validation for each revision.
 
 ## Product and architecture
 
@@ -10,11 +10,12 @@ Generic env is first-class and literal. Git name/email, basic signing configurat
 
 ## Local acceptance evidence
 
-- Unified unittest run: **71 tests, 70 passed, 1 skipped**. The skip is the Zsh-only string-attribute test under Bash, not a missing supported shell.
+- The unified unittest suite passes locally. One Zsh-only string-attribute test is intentionally skipped under Bash, not because a supported shell is missing. Run the commands in CONTRIBUTING.md for the current count and results.
 - Real independent Bash/Zsh processes remain alive while the other profile changes.
 - Missing, empty and nonempty baselines restore; different key sets, idempotence and child inheritance are covered.
 - Actual Git commits override stale local names; nonempty cherry-pick and rebase preserve original authors and select the current committer.
 - Actual Git SSH invocation is observed through a local mock executable, including a quoted key path with spaces/Unicode/command-like characters; no remote SSH authentication is claimed.
+- Relative SSH/GitHub semantic paths are rejected. Home-relative paths resolve against the destination profile's effective HOME, including restoration of variables dropped during a switch.
 - Actual Git identities and runtime configuration are diagnosed. GitHub login match/mismatch, wrong host, API failure and offline results use deterministic mock gh fixtures.
 - Injection characters are round-tripped in real Bash/Zsh without creating marker files; readonly, integer/nameref and Zsh transformation attributes fail before partial changes.
 - Repository/global Git config bytes remain unchanged. Existing proxies and appended third-party runtime pairs survive switching.
@@ -23,9 +24,9 @@ Generic env is first-class and literal. Git name/email, basic signing configurat
 
 ## Supported scope
 
-Locally verified: Linux/WSL, Python 3.13, Bash 5.2 and installed Zsh/Git. Bash integration avoids Bash 4-only constructs. CI includes Ubuntu/macOS and Python 3.11/3.13, selecting /bin/bash on macOS to test its system Bash. Hosted CI has not yet run in this local repository.
+Locally verified: Linux/WSL, Python 3.13, Bash 5.2 and installed Zsh/Git. Bash integration avoids Bash 4-only constructs. CI includes Ubuntu/macOS and Python 3.11/3.13, selecting /bin/bash on macOS to test its system Bash. Refer to the workflow runs for hosted platform evidence.
 
-Windows PowerShell and VS Code identity binding are deferred experimental work. Their earlier private prototype is retained separately and is not advertised as tested support in this public package.
+Windows PowerShell and VS Code identity binding are deferred experimental work and are outside this package's supported interface.
 
 ## Security and credentials
 
@@ -33,7 +34,7 @@ Config initialization is explicit, exclusive and mode 0600. Activation/exec/insp
 
 Profiles are trusted local input; DevWho is not a security boundary between OS-account users, a secret manager or a command sandbox. Git transport authentication and gh login remain distinct from commit identity. No credential contents are copied into source or automatically moved between gh config directories.
 
-Source/examples use fictional identities. The supplied discussion guide is ignored, and real local profiles/build backups stay outside the repository. A working-tree/package/history scan precedes delivery; findings, if any, are release blockers rather than silently removed secrets.
+Source/examples use fictional identities. Local design notes, profiles and backups are excluded from tracked source and packages. A working-tree/package/history scan is part of the source-publication review. Findings must be resolved before publishing affected content.
 
 ## Alternatives
 
@@ -41,12 +42,12 @@ Source/examples use fictional identities. The supplied discussion guide is ignor
 
 ## Limits and release decisions
 
-- Hosted Ubuntu/macOS CI and macOS system Bash acceptance remain pending. Local Linux evidence cannot substitute for those results.
+- Verify the target revision's hosted Ubuntu/macOS matrix before tagging a release. Local Linux evidence cannot substitute for hosted platform results.
 - Live two-account GitHub/SSH/GCM authorization and pushing to a test repository require authenticated account setup and a separate operator check. Mock consumer routing is not proof of remote account ownership.
 - Runtime prefix/managed-block changes during activation make restoration fail conservatively; tail appendages are supported.
 - Inherited shells restore their inherited baseline; they do not know a parent's earlier baseline.
 - No directory auto-switching, daemon, GUI, remote identity guard, previous-profile stack or secret-provider integration is included.
-- Review MIT ownership and configure private security reporting before public publication. The license does not invent a maintainer's real name or email.
-- No repository visibility change, remote push, release tag, hosted release or package publication has been performed.
+- The project uses MIT licensing. Private vulnerability reports use the entry point in SECURITY.md.
+- No release tag, hosted release or package registry publication is included in the source push.
 
-The shell/process model meets local v0.1 acceptance. The project is a locally tested release candidate, **not an already published release or a claim that pending platform/authentication checks have passed**.
+The shell/process model has local v0.1 acceptance coverage. Confirm hosted CI and transport authentication separately before relying on an additional platform or live account setup.

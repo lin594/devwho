@@ -18,6 +18,11 @@ classifiers = [
   "Operating System :: MacOS",
 ]
 
+[project.urls]
+Homepage = "https://github.com/lin594/devwho"
+Source = "https://github.com/lin594/devwho"
+Issues = "https://github.com/lin594/devwho/issues"
+
 [project.scripts]
 devwho = "devwho.cli:main"
 

@@ -162,6 +162,16 @@ class CliTests(unittest.TestCase):
         self.assertIn("expected Jane Doe <jane.work@example.test>", mismatch.stdout)
         self.assertIn("actual Wrong User <wrong@example.test>", mismatch.stdout)
 
+    def test_current_verbose_reports_effective_identity_and_cli_directory(self):
+        env = dict(self.env, DEVWHO_PROFILE="work", GH_CONFIG_DIR=str(self.root / "gh-work"))
+        env.update(self.runtime_identity("Jane Doe", "jane.work@example.test"))
+        result = self.cli("current", "--verbose", env=env, cwd=self.repo)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("Git author: Jane Doe <jane.work@example.test>", result.stdout)
+        self.assertIn("Git committer: Jane Doe <jane.work@example.test>", result.stdout)
+        self.assertIn("GitHub config directory: " + str(self.root / "gh-work"), result.stdout)
+        self.assertNotIn("Local Wrong", result.stdout)
+
     def test_config_only_profile_show_and_doctor_are_supported(self):
         self.write_config(git=False)
         env = dict(self.env, DEVWHO_PROFILE="work", TOOL_PROFILE="work")
@@ -343,7 +353,15 @@ class CliTests(unittest.TestCase):
     def test_relocated_zipapp_supports_version_and_real_bash_zsh_activation(self):
         archive_dir = self.root / "relocated archive 中文"
         archive_dir.mkdir()
-        built = build(self.root / "temporary-build")
+        build_dir = self.root / "temporary-build"
+        build_dir.mkdir()
+        wheel = build_dir / "devwho-0.1.0-py3-none-any.whl"
+        wheel.write_bytes(b"wheel fixture")
+        built = build(build_dir)
+        self.assertIn(
+            hashlib.sha256(wheel.read_bytes()).hexdigest() + "  " + wheel.name,
+            (build_dir / "SHA256SUMS").read_text(encoding="ascii"),
+        )
         with zipfile.ZipFile(built) as archive:
             self.assertEqual(archive.read("LICENSE"), (ROOT / "LICENSE").read_bytes())
         relocated = archive_dir / ARCHIVE_NAME

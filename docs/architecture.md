@@ -15,6 +15,8 @@ TOML profile → parse and validate → compile EnvironmentPatch → shell trans
 
 `EnvironmentPatch` represents both values to set and keys to unset. Generic `[profiles.<name>.env]` values are literal strings. They are never evaluated by a shell. Explicit path fields such as SSH key and GitHub config paths may expand `~` using structured code, without `eval` or command substitution.
 
+SSH key and GitHub config paths must be absolute or start with `~/` (or be `~`). They are compiled against the effective HOME after restoring variables dropped by the previous profile and applying the target profile's environment. This keeps account selection independent of the current working directory and previous profile. Conflicting inherited author or token overrides are still checked before restoration.
+
 ## Configuration model
 
 The configuration is versioned TOML (`version = 1`) at `$XDG_CONFIG_HOME/devwho/config.toml`, falling back to `~/.config/devwho/config.toml`. The schema supports optional `[settings]` values `default_profile` and `shortcut_profile`, plus named profiles with:

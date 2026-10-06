@@ -1,15 +1,15 @@
-# Initial implementation audit
+# Project status
 
-Audit date: 2026-10-06. This page records the starting point; current acceptance evidence belongs in [release readiness](../OPEN_SOURCE_READINESS.md).
+DevWho is a Python command-line project for per-shell developer identity. Its source is public; version 0.1.0 has no tagged release or package registry publication yet.
 
-The requested WSL checkout initially contained only an untracked implementation-guide Markdown file and an empty Git repository on `master`, with no commits. There was no existing package manager, executable, test suite, CI or release in that checkout. No applicable AGENTS.md was found in its parent directories.
+## What DevWho provides
 
-A prior local implementation package existed outside this checkout. It was read directly during the audit: Python standard-library `dev_accounts.py`, `setup.py`, Bash/Zsh and PowerShell initialization scripts, an editor extension and unittest fixtures. It selected identity using a runtime Git include plus a per-account GH_CONFIG_DIR. There was no published-release evidence in the local checkout.
+DevWho compiles a version 1 TOML profile into environment settings for one shell or child process tree. Bash and Zsh initialization is explicit. Git identity, optional Git SSH settings, optional GitHub CLI context, and arbitrary literal environment variables are supported. `unsetdev` restores the baseline captured before the shell's first activation; `devwho exec` applies a profile only to the child process tree.
 
-The old activation code did not mutate repository configuration. Its installer did write machine-specific identity files, copy gh login state, install editor integration, and modify shell/editor configuration with backup manifests. Its `unsetdev` selected a fixed default, rather than restoring an arbitrary shell baseline. It lacked the new generic-env profile model, process-scoped exec interface and real independent-shell integration coverage.
+Activation and inspection do not rewrite Git or SSH configuration, move credentials, or edit shell startup files. GitHub account checks are explicit `doctor` operations. Review [the architecture](architecture.md) and [the configuration example](../examples/config.toml) for details.
 
-The useful pieces retained conceptually are the Python language/standard library approach, argparse CLI, Git runtime precedence, separate gh config directories, safe shell quoting and real disposable Git tests. Core transition logic was separated and extended to represent environment patches and shell-local baseline state. Machine-specific installation/editor logic and credentials were deliberately excluded from the public package.
+## Platform and release status
 
-Python 3.13, Bash 5.2, Zsh, Git, gh and Codex were available locally. Build tooling was installed only into a temporary Python virtual environment, using the existing interpreter. Availability here does not establish macOS/Windows support.
+The project requires Python 3.11 or newer. Linux/WSL Bash and Zsh have local integration coverage. GitHub Actions is configured for Ubuntu and macOS with Python 3.11 and 3.13; check the [workflow runs](https://github.com/lin594/devwho/actions/workflows/ci.yml) for hosted results. A configured workflow matrix is not itself evidence that every job has passed.
 
-Public CLI activation, restoration, scoped exec and inspection do not write Git config, SSH config, credentials or shell rc files. `devwho init` emits functions; `devwho config init` is an explicit exclusive file creation. Optional handoff notices read the current repository. The separate, user-authorized local setup is machine configuration and is not part of the release source or an automatic installer behavior.
+Windows PowerShell and editor identity integration are outside the supported v0.1 interface. No release, tag, or package publication is implied by the version in `pyproject.toml`.

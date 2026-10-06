@@ -2,6 +2,8 @@
 
 **Per-shell developer identity through environment variables.**
 
+[Project](https://github.com/lin594/devwho) · [Source](https://github.com/lin594/devwho) · [Issues](https://github.com/lin594/devwho/issues) · [CI workflow](https://github.com/lin594/devwho/actions/workflows/ci.yml)
+
 ```bash
 # Terminal A
 setdev work
@@ -19,11 +21,16 @@ Set your developer identity at the shell boundary. Tools launched from that shel
 
 Requires Python 3.11+, Git for Git identity, and Bash or Zsh. GitHub CLI and OpenSSH are needed only for their respective integrations. DevWho has no third-party runtime dependencies.
 
-This is an unreleased source project. From a checkout:
+This is an unreleased source project. Clone the repository and install it with [pipx](https://pipx.pypa.io/):
 
 ```bash
+git clone https://github.com/lin594/devwho.git
+cd devwho
 pipx install .
+devwho --version
 ```
+
+The project also provides a [GitHub Actions CI workflow](https://github.com/lin594/devwho/actions/workflows/ci.yml) for Ubuntu and macOS with Python 3.11 and 3.13. Check the workflow page for current run results; the configured matrix does not imply every job has passed.
 
 If pipx is unavailable, try the source checkout with existing Python:
 
@@ -91,9 +98,11 @@ TOOL_PROFILE = "work"
 NEW_TOOL_ACCOUNT = "work"
 ```
 
-`env` values are literal strings: `$HOME`, backticks and `$(...)` are not expanded. You can also use `unset_env = ["VARIABLE"]` at profile level. Only explicit path fields expand `~`. See [the runnable example](examples/config.toml).
+`env` values are literal strings: `$HOME`, backticks and `$(...)` are not expanded. You can also use `unset_env = ["VARIABLE"]` at profile level. SSH key and GitHub config paths must be absolute, `~`, or start with `~/`; home-relative paths use the effective HOME after switching. Relative paths and `~other-user` are rejected. See [the runnable example](examples/config.toml).
 
 `show` displays identity metadata and custom variable names, with custom values hidden. Configuration is trusted local input: tools may interpret variables or explicit Git configuration as executable settings. DevWho quotes shell output; it does not sandbox those tools or isolate the shared OS account.
+
+`current --verbose` displays effective Git author/committer metadata and the GitHub CLI configuration location. Use `doctor` to compare them with the profile and verify an actual GitHub login.
 
 ## Switch and restore
 
@@ -183,7 +192,7 @@ Exit codes: `0` verified checks passed, `1` failure/mismatch, `2` required live 
 
 [Alternatives](docs/alternatives.md) compares Git includeIf, profile switchers, `gh auth switch`, and direnv. Generic environment management already exists; DevWho packages explicit developer profiles, reversible shell switching, scoped execution and consumer verification into a small interface.
 
-No daemon, directory auto-switching, GUI, secret store, remote guard or editor extension is part of v0.1. Those belong to optional follow-up work. See [architecture](docs/architecture.md), [migration](docs/migration.md) and [release readiness](OPEN_SOURCE_READINESS.md).
+No daemon, directory auto-switching, GUI, secret store, remote guard or editor extension is part of v0.1. Those belong to optional follow-up work. See [architecture](docs/architecture.md), [migration from existing Git and GitHub CLI settings](docs/migration.md), and [project status](docs/current-state.md).
 
 ## Develop
 

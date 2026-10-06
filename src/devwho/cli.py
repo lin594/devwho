@@ -196,6 +196,21 @@ def main(argv: list[str] | None = None) -> int:
             print(os.environ.get("DEVWHO_PROFILE") or "none")
             if args.verbose:
                 print("Configuration: " + str(args.config or config_path()))
+                print("GitHub config directory: " + os.environ.get("GH_CONFIG_DIR", "default"))
+                print("GitHub hostname: " + os.environ.get("GH_HOST", "github.com"))
+                for label, variable in [
+                    ("Git author", "GIT_AUTHOR_IDENT"),
+                    ("Git committer", "GIT_COMMITTER_IDENT"),
+                ]:
+                    try:
+                        result = _run(["git", "var", variable])
+                        match = re.fullmatch(
+                            r"([^\r\n]*<[^\r\n]*>) [0-9]+ [+-][0-9]+", result.stdout.strip()
+                        )
+                        identity = match.group(1) if result.returncode == 0 and match else None
+                    except (OSError, subprocess.TimeoutExpired):
+                        identity = None
+                    print(label + ": " + (identity or "unavailable"))
                 print("Use devwho doctor to verify actual tool identity.")
             return 0
         if args.command == "config":

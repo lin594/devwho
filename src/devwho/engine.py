@@ -35,6 +35,31 @@ class EnvironmentPatch:
         return result
 
 
+def _check_conflicts(profile: Profile, environ: Mapping[str, str]) -> None:
+    overrides = ("GIT_AUTHOR_NAME", "GIT_AUTHOR_EMAIL", "GIT_COMMITTER_NAME", "GIT_COMMITTER_EMAIL")
+    for key in overrides:
+        if environ.get(key):
+            raise TransitionError(f"Conflicting environment variable: {key}")
+    if profile.github:
+        for key in ("GH_TOKEN", "GITHUB_TOKEN"):
+            if environ.get(key) or profile.env.get(key):
+                raise TransitionError(f"Conflicting environment variable: {key}")
+
+
+def _semantic_path(value: str, environ: Mapping[str, str], field: str) -> str:
+    if value == "~" or value.startswith("~/"):
+        if not environ.get("HOME"):
+            raise TransitionError(f"{field} requires a nonempty effective HOME for ~ paths")
+        expanded = expand_path(value, environ)
+    elif Path(value).is_absolute():
+        expanded = value
+    else:
+        raise TransitionError(f"{field} must be an absolute path, ~, or start with ~/")
+    if not Path(expanded).is_absolute():
+        raise TransitionError(f"{field} must expand to an absolute path")
+    return expanded
+
+
 def compile_profile(profile: Profile, environ: Mapping[str, str]) -> Compiled:
     # Validate programmatically constructed profiles as strictly as TOML ones.
     profile = parse_profile(
@@ -47,14 +72,7 @@ def compile_profile(profile: Profile, environ: Mapping[str, str]) -> Compiled:
             "unset_env": list(profile.unset_env),
         },
     )
-    overrides = ("GIT_AUTHOR_NAME", "GIT_AUTHOR_EMAIL", "GIT_COMMITTER_NAME", "GIT_COMMITTER_EMAIL")
-    for key in overrides:
-        if environ.get(key):
-            raise TransitionError(f"Conflicting environment variable: {key}")
-    if profile.github:
-        for key in ("GH_TOKEN", "GITHUB_TOKEN"):
-            if environ.get(key) or profile.env.get(key):
-                raise TransitionError(f"Conflicting environment variable: {key}")
+    _check_conflicts(profile, environ)
     values = dict(profile.env)
     values["DEVWHO_PROFILE"] = profile.name
     runtime: list[tuple[str, str]] = []
@@ -69,8 +87,14 @@ def compile_profile(profile: Profile, environ: Mapping[str, str]) -> Compiled:
             runtime.append((key, profile.git[field]))
     if "sign_commits" in profile.git:
         runtime.append(("commit.gpgSign", str(profile.git["sign_commits"]).lower()))
+    path_environ = dict(environ)
+    for key in profile.unset_env:
+        path_environ.pop(key, None)
+    path_environ.update(profile.env)
     if profile.git_ssh:
-        identity = expand_path(profile.git_ssh["identity_file"], environ)
+        identity = _semantic_path(
+            profile.git_ssh["identity_file"], path_environ, "git_ssh.identity_file"
+        )
         try:
             available = Path(identity).is_file()
         except (OSError, ValueError):
@@ -82,7 +106,9 @@ def compile_profile(profile: Profile, environ: Mapping[str, str]) -> Compiled:
             command += " -o IdentitiesOnly=yes"
         values["GIT_SSH_COMMAND"] = command
     if profile.github:
-        values["GH_CONFIG_DIR"] = expand_path(profile.github["config_dir"], environ)
+        values["GH_CONFIG_DIR"] = _semantic_path(
+            profile.github["config_dir"], path_environ, "github.config_dir"
+        )
         values["GH_HOST"] = profile.github.get("hostname", "github.com")
     for key, value in values.items():
         validate_env_key(key, internal=True)
@@ -255,11 +281,11 @@ def transition(
     old = None if state_or_none is None else _validate_state(state_or_none)
     if profile_or_none is not None and profile_or_none not in config.profiles:
         raise TransitionError("Unknown profile")
-    compiled = (
-        None
-        if profile_or_none is None
-        else compile_profile(config.profiles[profile_or_none], environ)
-    )
+    profile = None if profile_or_none is None else config.profiles[profile_or_none]
+    # Check the inherited environment before restoring prior managed keys; an
+    # earlier profile must not silently erase a conflicting inherited token.
+    if profile is not None:
+        _check_conflicts(profile, environ)
     target = dict(environ)
     baseline = {} if old is None else dict(old["baseline"])
     if old:
@@ -268,6 +294,7 @@ def transition(
                 target.pop(key, None)
             else:
                 target[key] = baseline[key]
+    compiled = None if profile is None else compile_profile(profile, target)
     runtime = _runtime_transition(
         target,
         None if old is None else old["runtime"],
