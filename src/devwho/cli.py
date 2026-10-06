@@ -40,9 +40,10 @@ def parser() -> argparse.ArgumentParser:
     internal.add_argument("action", choices=["transition", "bootstrap", "notice"])
     internal.add_argument("--shell", choices=["bash", "zsh"])
     mode = internal.add_mutually_exclusive_group()
-    mode.add_argument("--activate", action="store_true")
+    # Keep the optional profile attached to its option. Older argparse versions
+    # cannot reliably resume an optional positional after the shell/mode flags.
+    mode.add_argument("--activate", nargs="?", const="", metavar="PROFILE")
     mode.add_argument("--restore", action="store_true")
-    internal.add_argument("profile", nargs="?")
     return root
 
 
@@ -297,7 +298,7 @@ def main(argv: list[str] | None = None) -> int:
                 state = json.loads(raw_state) if raw_state else None
             except json.JSONDecodeError:
                 raise ValueError("Invalid DevWho shell state; open a fresh shell") from None
-            profile = None if args.restore else args.profile or config.shortcut_profile
+            profile = None if args.restore else args.activate or config.shortcut_profile
             if not args.restore and not profile:
                 raise ValueError("setdev needs PROFILE or settings.shortcut_profile")
             if profile is not None and profile not in config.profiles:
