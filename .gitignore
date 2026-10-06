@@ -18,3 +18,5 @@ workspaces/
 backups/
 user-data/
 DevWho-Codex-OpenSource-Implementation-Guide-*.md
+
+/reports/

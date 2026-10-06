@@ -13,7 +13,7 @@ import (
 	"time"
 )
 
-const version = "0.1.0"
+const version = "0.1.0-rc.1"
 
 func environment() Env {
 	e := Env{}

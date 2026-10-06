@@ -28,12 +28,12 @@ git clone https://github.com/lin594/devwho.git
 cd devwho
 python3 scripts/build_zipapp.py
 mkdir -p "$HOME/.local/bin"
-install -m 755 dist/devwho-0.1.0.pyz "$HOME/.local/bin/devwho"
+install -m 755 dist/devwho-0.1.0rc1.pyz "$HOME/.local/bin/devwho"
 export PATH="$HOME/.local/bin:$PATH"
 devwho --version
 ```
 
-You should see `devwho 0.1.0`. The installed file contains DevWho, but still uses your system's Python 3.11+. It has no third-party runtime dependencies. Retain the source checkout if you want to update from it later.
+You should see `devwho 0.1.0-rc.1`. The installed file contains DevWho, but still uses your system's Python 3.11+. It has no third-party runtime dependencies. Retain the source checkout if you want to update from it later.
 
 If you already use pipx, you may instead run `pipx install .` from the checkout. Ensure pipx's executable directory is on PATH, then check `devwho --version`. Choose one installation method so you know which executable you are updating. There is no PyPI release yet; these instructions install this repository's code.
 
@@ -129,7 +129,7 @@ For the single-file installation, run these inside a clean source checkout:
 ```sh
 git pull --ff-only
 python3 scripts/build_zipapp.py
-install -m 755 dist/devwho-0.1.0.pyz "$HOME/.local/bin/devwho"
+install -m 755 dist/devwho-0.1.0rc1.pyz "$HOME/.local/bin/devwho"
 ```
 
 Then open a new terminal and check `devwho --version`. For pipx, reinstall from the updated checkout with `pipx install --force .`.

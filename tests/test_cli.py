@@ -354,7 +354,7 @@ class CliTests(unittest.TestCase):
         archive_dir.mkdir()
         build_dir = self.root / "temporary-build"
         build_dir.mkdir()
-        wheel = build_dir / "devwho-0.1.0-py3-none-any.whl"
+        wheel = build_dir / (ARCHIVE_NAME.removesuffix(".pyz") + "-py3-none-any.whl")
         wheel.write_bytes(b"wheel fixture")
         built = build(build_dir)
         self.assertIn(

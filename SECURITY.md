@@ -2,7 +2,7 @@
 
 [简体中文](SECURITY.zh-CN.md)
 
-DevWho v0.1 is an unreleased project. No formal security audit or credential isolation is implied.
+DevWho v0.1.0-rc.1 is an early pre-release candidate. No formal security audit or credential isolation is implied.
 
 Profiles are trusted local configuration. Generic environment values are quoted as literal shell data. A child tool can still interpret environment variables or Git config as executable settings. DevWho does not sandbox commands, manage secrets, or protect two developers from each other within one OS account.
 

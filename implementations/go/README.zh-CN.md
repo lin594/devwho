@@ -4,7 +4,7 @@
 
 这是 [compatibility core v1](../../spec/compatibility-core-v1.zh-CN.md) 的独立实现，负责配置解析、校验、环境编译、可恢复切换、Bash/Zsh 渲染、子进程执行与诊断。运行时不调用 Python 或其他 DevWho 核心。
 
-Unix 使用 `exec` 保留 argv、退出状态和信号。Windows 进程执行明确不支持，请使用受支持的 Unix 环境。CI 运行会提供开发构建产物，目前没有正式标签发布；请查看成功的目标运行及其平台验证结果。
+Unix 使用 `exec` 保留 argv、退出状态和信号。Windows 进程执行明确不支持，请使用受支持的 Unix 环境。CI 运行会提供开发构建产物，标签候选版本见仓库预发行页面；请查看成功的目标运行及其平台验证结果。
 
 托管二进制按平台构建，不是通用二进制。Go Linux 构建会因构建配置而静态链接或动态链接；请检查对应归档的 `RUNTIME.txt`，不要假设所有构建使用相同链接方式。目前不宣传 Linux ARM64 支持。macOS ARM64 二进制按实际 runner 架构构建；请确认对应目标运行及其 runtime 说明。
 

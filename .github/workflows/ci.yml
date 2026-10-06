@@ -16,8 +16,8 @@ jobs:
         python: ['3.11', '3.13']
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
         with:
           python-version: ${{ matrix.python }}
       - name: Install Zsh on Linux
@@ -41,14 +41,14 @@ jobs:
         run: |
           python -m build
           python scripts/build_zipapp.py
-          python dist/devwho-0.1.0.pyz --version
+          python dist/devwho-*.pyz --version
           python -m pip install --force-reinstall --no-deps dist/*.whl
           cd "$RUNNER_TEMP"
           devwho --version
       - name: Verify distribution checksums
         working-directory: dist
         run: shasum -a 256 -c SHA256SUMS
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: devwho-${{ matrix.os }}-py${{ matrix.python }}
           path: dist/
@@ -59,11 +59,11 @@ jobs:
         os: [ubuntu-latest, macos-latest]
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
         with:
           python-version: '3.13'
-      - uses: actions/setup-go@v5
+      - uses: actions/setup-go@v7
         with:
           go-version: stable
           cache-dependency-path: implementations/go/go.sum
@@ -126,7 +126,7 @@ jobs:
               -v "$PWD/build/core-packages/$core:/artifacts:ro" \
               devwho-runtime-check /artifacts/devwho | tee "reports/$core-runtime.txt"
           done
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: complete-cores-${{ matrix.os }}
@@ -136,8 +136,8 @@ jobs:
   minimum-compilers:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
         with:
           go-version: '1.23.x'
           cache-dependency-path: implementations/go/go.sum

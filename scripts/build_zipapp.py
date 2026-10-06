@@ -6,12 +6,16 @@ from __future__ import annotations
 import hashlib
 import shutil
 import tempfile
+import tomllib
 import zipapp
 from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
-ARCHIVE_NAME = "devwho-0.1.0.pyz"
+PACKAGE_VERSION = tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))["project"][
+    "version"
+]
+ARCHIVE_NAME = f"devwho-{PACKAGE_VERSION}.pyz"
 
 
 def build(output_dir: str | Path | None = None) -> Path:

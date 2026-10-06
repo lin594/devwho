@@ -95,9 +95,7 @@ python3 conformance/run.py --executable implementations/bash/devwho --peer bin/d
 The shared runner exercises real Bash/Zsh/Git/SSH, TOML encodings and invalid
 schema, cross-implementation state, literal argv, exit/signals, diagnostics and
 atomic restoration. Source-tree tests do not by themselves prove every supported
-OS or a Python-free deployment. This port remains experimental until the common
-release matrix and isolated runtime checks pass; consult the report from the
-specific release rather than assuming coverage from a source commit.
+OS or a Python-free deployment. RC1 now has successful hosted Linux/macOS and isolated Python-free runtime evidence; consult the final-release report for its exact targets.
 
 No startup/profile files, saved Git/SSH config, credentials, remotes, branches or
 working files are changed by activation.
@@ -144,6 +142,5 @@ Bash integration. The implementation-specific suite passed **20 tests**. A fresh
 prefix install, installed symlink, inherited/target Unicode and SHLVL/PWD,
 PATH/TMPDIR changes, and a newline-suffixed configuration filename were checked.
 
-These are Linux results. Actual macOS/Windows and clean runtime filesystem
-acceptance remain responsibilities of the shared release matrix. Python here is
+These earlier local results are complemented by successful hosted Linux x86-64/macOS ARM64 CI: 71 shared cases per core, actual system Bash 3.2 on macOS, and Bash/Zsh integration. FZ2 and hosted Linux checks also ran the packaged core in a network-disabled filesystem without Python or compilers. Windows remains unsupported. Python here is
 only the development test driver; it is not invoked by the installed runtime.

@@ -4,7 +4,7 @@
 
 An independent implementation of [compatibility core v1](../../spec/compatibility-core-v1.md). It parses profiles, validates and compiles adapters, manages reversible shell state, renders Bash/Zsh integration, executes child commands, and diagnoses consumers. Its runtime does not invoke Python or another DevWho core.
 
-Unix process execution uses `exec`, preserving argv, process exit status, and signals. Windows process execution is explicitly unsupported; use a supported Unix environment. CI runs provide development artifacts; there is no tagged release. Check a successful target run for platform validation.
+Unix process execution uses `exec`, preserving argv, process exit status, and signals. Windows process execution is explicitly unsupported; use a supported Unix environment. CI runs provide development artifacts; the tagged candidate is available from the [pre-release page](https://github.com/lin594/devwho/releases/tag/v0.1.0-rc.1). Check a successful target run for platform validation.
 
 Hosted binaries are platform-specific, not universal. Go Linux builds may be static or dynamically linked depending on build configuration; inspect the artifact's `RUNTIME.txt` for its exact system requirements rather than assuming all builds share one linkage model. Linux ARM64 is not advertised. macOS ARM64 binaries use the actual runner architecture; check the target run and its runtime note.
 

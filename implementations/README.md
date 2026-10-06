@@ -2,63 +2,60 @@
 
 [English](README.md) | [简体中文](README.zh-CN.md) · [Project overview](../README.md)
 
-The compatibility core makes existing Git, SSH, and GitHub CLI workflows follow the context selected in a terminal. Python, Go, Rust, and Bash implementations now target the same profile, command, transition, and restoration contract. Install or build **one** core for your machine.
+Install **one** core. RC1 recommends static Go for Linux x86-64 and Go for macOS **13+ ARM64**. The Rust macOS ARM64 binary declares macOS **11.0** minimum. These are deployment requirements, distinct from the actual hosted macOS 26.6.2 test host. See the [tested artifact matrix](../README.md#tested-candidate-artifacts) and each archive's `RUNTIME.txt` for target, libraries, deployment minimum and test host.
 
-## Implementation choices
+Python requires 3.11+ and no third-party runtime Python packages. Bash requires Bash 3.2+, jq 1.6+, Perl 5.18+ and standard utilities. Go/Rust binaries require no Python/compiler. Git 2.31+, gh and OpenSSH are consumer dependencies for their respective features. RC1 omits the Linux Rust binary because the hosted build requires glibc 2.39; it is still built/tested, and source builds remain available. Linux ARM64, macOS x86-64, Alpine/musl, Windows/PowerShell and editor identity binding remain unverified.
 
-| Implementation | Source and distribution | End-user requirements | Notes |
-|---|---|---|---|
-| Python | [`src/devwho`](../src/devwho), [`bin/devwho`](../bin/devwho) | Python 3.11+; no third-party runtime Python packages | Reference implementation; existing Python installation instructions remain available. |
-| Go | [`implementations/go`](go/README.md) | Prebuilt executable needs no Python or compiler; source build needs Go | Recommended for beginners; development artifacts are attached to `complete-cores-ubuntu-latest` and `complete-cores-macos-latest` workflow runs; download requires GitHub sign-in. |
-| Rust | [`implementations/rust`](rust/README.md) | Prebuilt executable needs no Python or compiler; source build needs Rust | Independent implementation; consult its README for build and platform coverage. |
-| Bash | [`implementations/bash`](bash/README.md) | Bash 3.2+, jq 1.6+, Perl 5.18+, standard OS utilities | Independent script implementation; Perl and jq are runtime requirements. |
-
-CI artifacts are development builds, not tagged releases. Their archive names and checksums are published with each workflow run; the archive targets the actual runner platform. No tag or hosted release is published. Go and Rust executables run without Python or a compiler at runtime. The Bash runtime invokes no Python core. Binary archives include `RUNTIME.txt` with the actual OS, architecture, and system-library requirements for that build. Linux Rust artifacts require glibc symbols through 2.39 and `libgcc_s`; Alpine/musl is unsupported. Go Linux builds may be static or dynamically linked depending on the build. Check each archive's `RUNTIME.txt` before installing. Linux ARM64 is not advertised.
+The [v0.1.0-rc.1 pre-release](https://github.com/lin594/devwho/releases/tag/v0.1.0-rc.1) provides selected tested assets, the complete `SHA256SUMS`, `RELEASE-MANIFEST.json`, and FZ2 downloaded-artifact validation evidence. Product versions use `0.1.0-rc.1`; package filenames use equivalent PEP 440 `0.1.0rc1`. Ordinary Actions downloads remain development artifacts. The [release plan](../release-plan.json) defines the exact eight distributions and canonical Python source; the [manual procedure](../docs/releasing.md) enforces completeness and provenance.
 
 ### Install the prebuilt Go core on Linux or macOS
 
-1. Open the repository’s [Actions workflow](https://github.com/lin594/devwho/actions/workflows/ci.yml), choose a successful CI run for the desired commit, then download its `complete-cores-[OS]` artifact. Extract the downloaded GitHub artifact ZIP.
-2. In the extracted directory, verify the archive checksum before unpacking it:
+1. Select the matching archive: Linux x86-64 uses `devwho-0.1.0rc1-go-linux-x86_64.tar.gz`; macOS 13+ ARM64 uses `devwho-0.1.0rc1-go-darwin-arm64.tar.gz`. Download **that archive and SHA256SUMS only** from the [pre-release](https://github.com/lin594/devwho/releases/tag/v0.1.0-rc.1). For example:
 
    ```sh
-   cd /path/to/extracted-artifact/dist/cores
-   sha256sum -c SHA256SUMS       # Linux
-   shasum -a 256 -c SHA256SUMS  # macOS
+   asset=devwho-0.1.0rc1-go-linux-x86_64.tar.gz  # macOS: devwho-0.1.0rc1-go-darwin-arm64.tar.gz
+   base=https://github.com/lin594/devwho/releases/download/v0.1.0-rc.1
+   curl -fLO "$base/$asset"
+   curl -fLO "$base/SHA256SUMS"
    ```
 
-3. Unpack the Go archive for your runner. Linux x86-64 uses `devwho-go-linux-x86_64.tar.gz`; macOS uses the exact `devwho-go-darwin-ARCH.tar.gz` filename listed in `SHA256SUMS` for that runner. For example:
+2. Verify the exact selected entry; unrelated distributions are not needed:
 
    ```sh
-   tar -xzf devwho-go-linux-x86_64.tar.gz
-   cd devwho-go-linux-x86_64
-   # On macOS, substitute its matching archive and cd into devwho-go-darwin-ARCH.
+   awk -v name="$asset" '$2 == name {print; found=1} END {if (!found) exit 1}' SHA256SUMS > selected.SHA256SUMS
+   sha256sum -c selected.SHA256SUMS  # Linux
+   # macOS: shasum -a 256 -c selected.SHA256SUMS
    ```
 
-   The archive contains `devwho` and the optional `devwho-setup` standalone editor. Install either or both into a user-owned directory:
+3. Unpack, inspect `RUNTIME.txt`, and install into a user-owned directory:
 
    ```sh
+   tar -xzf "$asset"
+   cd "${asset%.tar.gz}"
+   cat RUNTIME.txt
    mkdir -p "$HOME/.local/bin"
    install -m 755 devwho "$HOME/.local/bin/devwho"
-   install -m 755 devwho-setup "$HOME/.local/bin/devwho-setup"
+   install -m 755 devwho-setup "$HOME/.local/bin/devwho-setup"  # optional configuration editor
    export PATH="$HOME/.local/bin:$PATH"
+   devwho --version
    ```
 
-   The `install devwho-setup` line is optional if you want to edit TOML by hand. The PATH command applies to this terminal; add the same directory to your shell startup file if you want it in future terminals. No compiler is needed on the user machine.
-4. Optionally run `devwho-setup configure` and follow the form to save a profile. Then initialize the shell and activate it:
+   No compiler is required. The PATH change applies to this terminal; add the directory to your startup file if desired.
+4. Save profiles with `devwho-setup configure` or initialize TOML explicitly with `devwho --config /absolute/path/config.toml config init`. Edit the example identities, then:
 
    ```sh
-   eval "$(devwho init bash)"  # use `zsh` instead of `bash` in Zsh
+   eval "$(devwho --config /absolute/path/config.toml init bash)"  # Zsh: init zsh
    setdev PROFILE_NAME
+   devwho doctor --offline
+   unsetdev
+   devwho --config /absolute/path/config.toml exec PROFILE_NAME -- git var GIT_AUTHOR_IDENT
    ```
 
-   `unsetdev` restores the shell baseline. The command pins this installed executable and the default configuration path for the current shell.
+   `unsetdev` restores the shell baseline. Doctor exit 2 means a configured online authentication check is unverified offline; it does not prove live account ownership.
 
-For source-build instructions and verification, see the [Go guide](go/README.md). To update Go or Rust, verify and extract the newer matching artifact, then replace only `~/.local/bin/devwho`; replace `devwho-setup` only if you are updating that optional tool too. An initialized shell keeps its current environment and restoration state. Open a fresh shell or re-run `devwho init bash`/`zsh` and evaluate the output to load updated integration code. Configuration, GitHub CLI data, and setup-editor backups remain in place. For Bash updates and removal, follow the [Bash guide](bash/README.md).
+For a Rust macOS ARM64 installation, choose `devwho-0.1.0rc1-rust-darwin-arm64.tar.gz`, verify/extract it the same way and install its `devwho`; it does not bundle `devwho-setup`. Its declared macOS minimum is 11.0, and the actual recorded test host is 26.6.2. Bash installation/update/removal is in the [Bash guide](bash/README.md). Python source/zipapp installation is in [Getting started](../docs/getting-started.md).
 
-To remove a Go/Rust installation, first remove any `devwho init` line you added to a shell startup file, then remove only the executable(s) you placed in `~/.local/bin` (for example, `devwho` and optionally `devwho-setup`). Keep configuration and GitHub CLI data if you may use them again.
-
-
-The core language does not limit the calling shell: all implementations provide `init bash` and `init zsh`. Git 2.31+ and optional `gh`/OpenSSH remain consumer dependencies for the features that use them. Windows/PowerShell and editor identity integration remain experimental or deferred.
+To update Go/Rust, verify the newer matching archive and replace only the installed executables. An initialized shell retains its environment/restoration state; open a fresh shell or re-evaluate `devwho init bash`/`zsh` for updated integration. Configuration, gh data and setup backups remain in place. To uninstall, remove any startup line you added, then only the known executables you installed; retain configuration and credentials unless deliberately removing them separately.
 
 ## Shared behavior and format
 
