@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "tag": "v0.1.0-rc.1",
+  "package_version": "0.1.0rc1",
+  "canonical_python_source": "devwho-ubuntu-latest-py3.11",
+  "sources": {
+    "complete-cores-ubuntu-latest": {
+      "job": "cores (ubuntu-latest)",
+      "target": "linux-x86_64",
+      "assets": [
+        "devwho-0.1.0rc1-go-linux-x86_64.tar.gz",
+        "devwho-0.1.0rc1-bash-unix-source-linux-x86_64.tar.gz"
+      ]
+    },
+    "complete-cores-macos-latest": {
+      "job": "cores (macos-latest)",
+      "target": "darwin-arm64",
+      "assets": [
+        "devwho-0.1.0rc1-go-darwin-arm64.tar.gz",
+        "devwho-0.1.0rc1-rust-darwin-arm64.tar.gz",
+        "devwho-0.1.0rc1-bash-unix-source-darwin-arm64.tar.gz"
+      ]
+    },
+    "devwho-ubuntu-latest-py3.11": {
+      "job": "test (ubuntu-latest, 3.11)",
+      "target": "Python 3.11+ source/wheel/zipapp",
+      "assets": [
+        "devwho-0.1.0rc1-py3-none-any.whl",
+        "devwho-0.1.0rc1.tar.gz",
+        "devwho-0.1.0rc1.pyz"
+      ]
+    }
+  },
+  "macos_binary_minimums": {"go": "13.0", "setup": "13.0", "rust": "11.0"},
+  "omitted": [
+    {"core": "rust", "target": "linux-x86_64", "reason": "The hosted build requires glibc 2.39. RC1 offers source builds and CI coverage, but omits this constrained binary; static Go is recommended."}
+  ]
+}

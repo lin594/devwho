@@ -21,6 +21,28 @@ DevWho 帮助需要使用多个开发身份的人：例如区分个人和工作�
 
 如果 Git 的目录条件配置 `includeIf` 已经解决了你的问题，就不一定需要 DevWho。DevWho 更适合按**当前终端由谁使用**来选择身份，而不是按仓库所在目录选择。[比较不同方案 →](docs/alternatives.md)
 
+## 已验证候选产物
+
+| 下载文件 | 目标与实跑证据 | 运行要求 |
+|---|---|---|
+| `devwho-0.1.0rc1-go-linux-x86_64.tar.gz`（推荐） | Linux x86-64；Ubuntu CI 和 FZ2 Debian WSL | Go core/配置前端为静态程序；无需 Python、编译器或动态 libc |
+| `devwho-0.1.0rc1-go-darwin-arm64.tar.gz`（推荐） | macOS ARM64；托管 macOS 26.6.2 | core/配置前端声明最低 macOS **13.0**；无需 Python/编译器 |
+| `devwho-0.1.0rc1-rust-darwin-arm64.tar.gz` | macOS ARM64；托管 macOS 26.6.2 | 程序声明最低 macOS **11.0**；无需 Python/编译器 |
+| `devwho-0.1.0rc1-bash-unix-source-linux-x86_64.tar.gz` / `devwho-0.1.0rc1-bash-unix-source-darwin-arm64.tar.gz` | 脚本归档；Linux x86-64、macOS ARM64 CI 的真实 Bash/Zsh | Bash 3.2+、jq 1.6+、Perl 5.18+ 与标准 Unix 工具 |
+| `devwho-0.1.0rc1.pyz`、wheel 或 sdist | Python 分发；Linux x86-64/macOS ARM64 的 Python 3.11/3.13 CI | Python 3.11+；无需第三方运行时 Python 包 |
+
+macOS 最低部署版本来自程序头，与实际 CI 测试宿主不同；`RUNTIME.txt` 同时记录两者。RC1 不发布 Linux Rust 二进制，因为其托管构建需要 glibc 2.39；Linux 推荐静态 Go，或自行从源码构建 Rust。源码可用不代表未经实测架构的预编译支持。Windows/PowerShell、VS Code 绑定、Linux ARM64、macOS x86-64、Alpine/musl 与真实双账号远端认证仍未验收。
+
+从[预发行](https://github.com/lin594/devwho/releases/tag/v0.1.0-rc.1)只下载所选归档和 `SHA256SUMS`，选取该文件的精确条目后核验，无需下载其他平台产物：
+
+```sh
+asset=devwho-0.1.0rc1-go-linux-x86_64.tar.gz  # 按上表替换目标
+awk -v name="$asset" '$2 == name {print; found=1} END {if (!found) exit 1}' SHA256SUMS > selected.SHA256SUMS
+sha256sum -c selected.SHA256SUMS  # macOS: shasum -a 256 -c selected.SHA256SUMS
+```
+
+完整安装/更新/卸载步骤见[指南](implementations/README.zh-CN.md)。Git 2.31+、gh 和 SSH 仍是相应功能的可选消费工具。
+
 ## 统一的环境约定，以及面向现有工具的兼容层
 
 我们的目标是：选择一次身份上下文，让应用自行读取并使用，就像应用读取代理环境变量一样。原生支持的应用可以读取 `DEVWHO_PROFILE`，再映射到自己的账号。它们无需导入 Python 模块、读取版本变量，也无需为每个应用另造一套 DevWho 变量。目前这份[环境变量约定](spec/environment-v1.zh-CN.md)仍是**草案**。

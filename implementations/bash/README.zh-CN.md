@@ -74,7 +74,7 @@ python3 conformance/run.py --executable implementations/bash/devwho --peer bin/d
 
 公共测试覆盖真实 Bash/Zsh/Git/SSH、TOML 编码、错误配置、跨实现状态、字面参数、
 退出与信号、诊断及原子恢复。源码测试不能替代无 Python 运行环境验证和完整发行平台矩阵；
-通过这些发行检查前，本实现仍标记为实验性，请以对应发行版本的验证报告为准。
+RC1 已有成功的托管 Linux/macOS 和无 Python 隔离运行证据；具体目标以最终发行报告为准。
 
 ## 可选 dotenv 前端
 
@@ -104,5 +104,4 @@ Linux x86_64 上，Bash 5.2.37 / Zsh 5.9、jq 1.7、Perl 5.40.1 的公共测试 
 （Bash 中跳过一项仅适用于 Zsh 的检查），包括 Python 核心状态互操作。另行编译的
 **Bash 3.2.0** 同时运行核心解释器及 Bash 集成时，同样通过 63 项公共测试。实现自身
 **20 项测试通过**，并验证了新前缀安装、安装链接、Unicode、SHLVL/PWD、PATH/TMPDIR
-及末尾含换行的配置文件名。这是 Linux 验证结果；真实 macOS/Windows 及隔离运行环境
-仍需公共发行矩阵验证。测试驱动依赖 Python，安装后的运行时不调用 Python。
+及末尾含换行的配置文件名。这些早期 Linux 本地记录已补充托管 Linux x86-64/macOS ARM64 的 71 项公共验收，包括 macOS 系统 Bash 3.2 和 Bash/Zsh；FZ2/托管 Linux 的禁网、无 Python/编译器运行环境也通过。Windows 仍不支持。测试驱动依赖 Python，安装后的运行时不调用 Python。

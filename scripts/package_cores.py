@@ -51,6 +51,17 @@ def runtime_requirements(directory, language, target):
                 output = subprocess.check_output(["otool", "-L", str(binary)], text=True)
                 lines.append("macOS system libraries:")
                 lines.extend(line.strip() for line in output.splitlines()[1:])
+                loads = subprocess.check_output(["otool", "-l", str(binary)], text=True)
+                floors = []
+                for block in loads.split("Load command ")[1:]:
+                    if "cmd LC_BUILD_VERSION" in block:
+                        floors += re.findall(r"^\s*minos\s+([0-9.]+)\s*$", block, re.M)
+                    elif "cmd LC_VERSION_MIN_MACOSX" in block:
+                        floors += re.findall(r"^\s*version\s+([0-9.]+)\s*$", block, re.M)
+                if not floors:
+                    raise ValueError("Missing Mach-O minimum macOS deployment target")
+                minimum = max(floors, key=lambda value: tuple(map(int, value.split("."))))
+                lines.append("Minimum macOS deployment target: " + minimum + ".")
                 lines.append("Tested on macOS " + platform.mac_ver()[0] + ".")
             else:
                 raise ValueError("Packaging is supported only on tested Linux/macOS hosts")
@@ -110,6 +121,9 @@ def main():
             if (source / "licenses").is_dir():
                 shutil.copytree(source / "licenses", dest / "licenses")
         runtime_requirements(dest, language, target)
+        if language == "rust" and platform.system() == "Linux":
+            print("Rust Linux staged for runtime tests; omitted from RC1 release assets.")
+            continue
         suffix = "unix-source-" + target if language == "bash" else target
         archive = args.output / f"devwho-{VERSION}-{language}-{suffix}.tar.gz"
         with tarfile.open(archive, "w:gz") as tar:

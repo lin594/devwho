@@ -1,17 +1,17 @@
 # Open-source readiness
 
-Assessment: 2026-10-06. Candidate: v0.1.0-rc.1. This checklist describes the development branch. Source hosting does not constitute a tagged or packaged release. The [CI workflow](https://github.com/lin594/devwho/actions/workflows/ci.yml) records hosted validation for each revision. The `cores` job builds and tests Ubuntu/macOS artifacts; inspect that run for its actual result before release decisions. The [candidate release](https://github.com/lin594/devwho/releases/tag/v0.1.0-rc.1) records its final commit, verified CI run, and tested artifact checksums.
+Assessment: 2026-10-06. Candidate: v0.1.0-rc.1. This checklist defines the RC1 release gates. Source hosting does not constitute a tagged or packaged release. The [CI workflow](https://github.com/lin594/devwho/actions/workflows/ci.yml) records hosted validation for each revision. The `cores` job builds and tests Ubuntu/macOS artifacts; inspect that run for its actual result before release decisions. The [candidate release](https://github.com/lin594/devwho/releases/tag/v0.1.0-rc.1) records its final commit, verified CI run, and tested artifact checksums.
 
 ## First candidate verification on FZ2
 
 The v0.1.0-rc.1 candidate was built and exercised on FZ2 under Debian WSL, Linux x86-64, with real Bash/Zsh/Git:
 
-- Python regression: 80 tests passed, with one expected Zsh-only case skipped in the Bash group.
+- Python regression: 84 tests passed, with one expected Zsh-only case skipped in the Bash group.
 - Python, Go, Rust and Bash: each passed 71 shared contract cases, including peer-state interchange; the same expected Bash-group skip applies.
 - Go core/setup unit tests and vet, Rust locked unit tests/build, Bash's 20 implementation tests, and the native example's 9 selection cases plus four producer integrations passed.
 - Ruff lint/format and Python compilation passed. Python wheel/sdist/zipapp and core archives built and their checksums verified.
 - Go, Rust and Bash ran in a network-disabled Debian runtime container with no Python or language compilers. The Go setup frontend passed its read/replace fixture there.
-- Local build tools were Python 3.13.5, Go 1.27.1, Cargo 1.90.0 and rustc 1.95.0. The local Rust archive differs from the hosted Ubuntu archive; the release uses its recorded CI runtime inventory.
+- Local build tools were Python 3.13.5, Go 1.27.1, Cargo 1.90.0 and rustc 1.95.0. The locally tested Rust binary is source-build evidence; RC1 omits its Linux archive and records hosted runtime inventories for shipped packages.
 
 The candidate version is 0.1.0-rc.1; Python metadata and asset names use the equivalent PEP 440 spelling 0.1.0rc1. Core archive names include version and tested target, including Bash, to avoid cross-runner collisions. The release assembly script verifies input checksums and rejects differing duplicates, then produces one checksum list and final-commit manifest.
 
@@ -69,3 +69,7 @@ Source/examples use fictional identities. Local design notes, profiles and backu
 - The first release is explicitly marked as a pre-release. Package registry publication is deferred.
 
 The Python, Go, Rust, and Bash shell/process models have recorded local acceptance coverage; each implementation README identifies its own limits. Confirm hosted CI and transport authentication separately before relying on an additional platform or live account setup. The optional native Go setup frontend has Linux x86-64 local evidence; Windows writes are unsupported. A native reference consumer example exists, but it does not establish third-party adoption.
+
+## RC1 asset plan
+
+The [explicit eight-asset plan](../release-plan.json) selects Linux x86-64 Go/Bash, macOS ARM64 Go/Rust/Bash, and one canonical Ubuntu/Python3.11 wheel/sdist/zipapp set. Rust Linux remains tested but is omitted from downloads because of glibc 2.39. macOS core/setup minimum deployment versions are recorded in RUNTIME.txt separately from the hosted test OS. The [manual procedure](releasing.md) rejects incomplete/unexpected assets and preserves source checksums and provenance.

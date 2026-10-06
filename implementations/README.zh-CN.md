@@ -2,63 +2,60 @@
 
 [English](README.md) | [简体中文](README.zh-CN.md) · [项目概览](../README.zh-CN.md)
 
-兼容核心让现有 Git、SSH 和 GitHub CLI 工作流程使用终端当前选择的上下文。Python、Go、Rust、Bash 实现现在都遵循相同的 profile、命令、切换和恢复契约。按设备安装或构建**一种**核心即可。
+安装**一种** core 即可。RC1 推荐 Linux x86-64 使用静态 Go，macOS **13+ ARM64** 使用 Go；Rust macOS ARM64 二进制声明最低 macOS **11.0**。这些是部署最低版本，与实际托管 macOS 26.6.2 测试宿主不同。[已验证产物矩阵](../README.zh-CN.md#已验证候选产物)和归档的 `RUNTIME.txt` 分别记录目标、系统库、最低部署版本和实测宿主。
 
-## 实现选项
+Python 要求 3.11+，无第三方运行时 Python 包；Bash 要求 Bash 3.2+、jq 1.6+、Perl 5.18+ 和标准工具。Go/Rust 二进制无需 Python/编译器。Git 2.31+、gh 和 OpenSSH 是各自功能的消费依赖。RC1 不发布需要 glibc 2.39 的 Linux Rust 二进制；它仍参加构建/测试，也可从源码自行构建。Linux ARM64、macOS x86-64、Alpine/musl、Windows/PowerShell 和编辑器身份绑定未验收。
 
-| 实现 | 源码与分发 | 最终用户所需环境 | 说明 |
-|---|---|---|---|
-| Python | [`src/devwho`](../src/devwho)、[`bin/devwho`](../bin/devwho) | Python 3.11 或更高版本；运行时不需要第三方 Python 包 | 参考实现；保留现有 Python 安装说明。 |
-| Go | [`implementations/go`](go/README.md) | 预编译可执行文件运行时无需 Python 或编译器；源码构建需要 Go | 推荐初学者使用；经过验证的候选二进制见[预发行](https://github.com/lin594/devwho/releases/tag/v0.1.0-rc.1)。 |
-| Rust | [`implementations/rust`](rust/README.md) | 预编译可执行文件运行时无需 Python 或编译器；源码构建需要 Rust | 独立实现；构建和平台覆盖请参阅其 README。 |
-| Bash | [`implementations/bash`](bash/README.md) | Bash 3.2+、jq 1.6+、Perl 5.18+ 和标准系统工具 | 独立脚本实现；Perl 和 jq 是运行时依赖。 |
-
-[v0.1.0-rc.1 预发行](https://github.com/lin594/devwho/releases/tag/v0.1.0-rc.1)附已验证产物、统一校验清单和记录最终提交及 CI 来源的 RELEASE-MANIFEST.json。产品版本使用 0.1.0-rc.1；Python 包及产物文件名使用等价的 PEP 440 写法 0.1.0rc1。CI 产物仍为开发构建。Go/Rust 可执行文件运行时不需要 Python 或编译器；Bash 运行时不会调用 Python core。二进制归档含 `RUNTIME.txt`，记录该构建的实际操作系统、架构和系统库要求。Linux Rust 产物需要最高至 2.39 的 glibc 符号及 `libgcc_s`，不支持 Alpine/musl。Go Linux 构建会因构建配置而静态链接或动态链接。安装前请检查对应归档的 `RUNTIME.txt`。目前不宣传 Linux ARM64 支持。
+[v0.1.0-rc.1 预发行](https://github.com/lin594/devwho/releases/tag/v0.1.0-rc.1)提供选定产物、完整 `SHA256SUMS`、`RELEASE-MANIFEST.json` 和 FZ2 下载产物验收证据。程序版本使用 `0.1.0-rc.1`，文件名采用等价的 PEP 440 `0.1.0rc1`。普通 Actions 下载仍是开发构建。[发行计划](../release-plan.json)指定八个完整产物和唯一 Python 来源；[手工发行步骤](../docs/zh-CN/releasing.md)强制检查完整性与来源。
 
 ### 在 Linux 或 macOS 安装预编译 Go core
 
-1. 打开[预发行](https://github.com/lin594/devwho/releases/tag/v0.1.0-rc.1)，将 SHA256SUMS、RELEASE-MANIFEST.json 及校验清单列出的产物下载到同一目录。核验完整下载集合后，选择匹配操作系统与 CPU 的 Go 归档。成功的 Actions 运行仍提供开发构建。
-2. 在解压后的目录中，先校验归档文件，再解包：
+1. 选择匹配归档：Linux x86-64 为 `devwho-0.1.0rc1-go-linux-x86_64.tar.gz`，macOS 13+ ARM64 为 `devwho-0.1.0rc1-go-darwin-arm64.tar.gz`。从[预发行](https://github.com/lin594/devwho/releases/tag/v0.1.0-rc.1)**只下载该归档和 SHA256SUMS**。例如：
 
    ```sh
-   cd /path/to/downloaded-release-assets
-   sha256sum -c SHA256SUMS       # Linux
-   shasum -a 256 -c SHA256SUMS  # macOS
+   asset=devwho-0.1.0rc1-go-linux-x86_64.tar.gz  # macOS: devwho-0.1.0rc1-go-darwin-arm64.tar.gz
+   base=https://github.com/lin594/devwho/releases/download/v0.1.0-rc.1
+   curl -fLO "$base/$asset"
+   curl -fLO "$base/SHA256SUMS"
    ```
 
-3. 解包与 runner 对应的 Go 归档。Linux x86-64 使用 `devwho-0.1.0rc1-go-linux-x86_64.tar.gz`；macOS 请使用 `SHA256SUMS` 中该 runner 对应的确切 `devwho-0.1.0rc1-go-darwin-ARCH.tar.gz` 文件名。例如：
+2. 只核验所选文件的精确条目，无需其他平台产物：
 
    ```sh
-   tar -xzf devwho-0.1.0rc1-go-linux-x86_64.tar.gz
-   cd devwho-0.1.0rc1-go-linux-x86_64
-   # macOS 请替换为匹配的归档名，并 cd 到 devwho-0.1.0rc1-go-darwin-ARCH 目录。
+   awk -v name="$asset" '$2 == name {print; found=1} END {if (!found) exit 1}' SHA256SUMS > selected.SHA256SUMS
+   sha256sum -c selected.SHA256SUMS  # Linux
+   # macOS: shasum -a 256 -c selected.SHA256SUMS
    ```
 
-   归档中包含 `devwho` 和可选的独立配置编辑器 `devwho-setup`。可将其中一个或两者安装到用户目录：
+3. 解压、读取 `RUNTIME.txt`，安装到用户目录：
 
    ```sh
+   tar -xzf "$asset"
+   cd "${asset%.tar.gz}"
+   cat RUNTIME.txt
    mkdir -p "$HOME/.local/bin"
    install -m 755 devwho "$HOME/.local/bin/devwho"
-   install -m 755 devwho-setup "$HOME/.local/bin/devwho-setup"
+   install -m 755 devwho-setup "$HOME/.local/bin/devwho-setup"  # 可选配置编辑器
    export PATH="$HOME/.local/bin:$PATH"
+   devwho --version
    ```
 
-   如果准备手动编辑 TOML，可以跳过安装 `devwho-setup`。PATH 命令只对当前终端生效；如需在新终端中使用，请把该目录加入 shell 启动文件。用户机器不需要编译器。
-4. 可选：运行 `devwho-setup --language zh-CN configure` 并按表单填写 profile。然后初始化 shell 并激活身份：
+   无需编译器；PATH 修改只影响当前终端，需要时可加入启动文件。
+4. 用 `devwho-setup --language zh-CN configure` 保存配置，或显式运行 `devwho --config /absolute/path/config.toml config init` 创建 TOML，修改示例身份，然后：
 
    ```sh
-   eval "$(devwho init bash)"  # 使用 Zsh 时将 `bash` 换成 `zsh`
+   eval "$(devwho --config /absolute/path/config.toml init bash)"  # Zsh: init zsh
    setdev PROFILE_NAME
+   devwho doctor --offline
+   unsetdev
+   devwho --config /absolute/path/config.toml exec PROFILE_NAME -- git var GIT_AUTHOR_IDENT
    ```
 
-   `unsetdev` 会恢复 shell 初始环境。该命令会为当前 shell 固定此可执行文件和默认配置路径。
+   `unsetdev` 恢复初始环境。若配置了在线认证检查，doctor 离线退出 2 表示未验证，不是远端账号归属已获证明。
 
-源码构建和验证说明见 [Go 指南](go/README.md)。更新 Go/Rust 时，校验并解压与平台匹配的新归档，然后只替换 `~/.local/bin/devwho`；只有同时更新可选工具时才替换 `devwho-setup`。已初始化的 shell 会保留当前环境和恢复状态。打开新 shell，或重新运行 `devwho init bash`/`zsh` 并执行输出，即可加载更新后的集成代码。配置、GitHub CLI 数据和配置前端备份会保留。Bash 的更新和卸载见 [Bash 指南](bash/README.zh-CN.md)。
+Rust macOS ARM64 用户选择 `devwho-0.1.0rc1-rust-darwin-arm64.tar.gz`，以相同方式校验、解压并安装 `devwho`；该包不附配置编辑器。程序声明最低 macOS 11.0，实测宿主记录为 26.6.2。Bash 安装/更新/卸载见[指南](bash/README.zh-CN.md)，Python 源码/zipapp 安装见[入门](../docs/zh-CN/getting-started.md)。
 
-卸载 Go/Rust 时，先从 shell 启动文件中移除自行添加的 `devwho init` 行，再只删除安装在 `~/.local/bin` 的可执行文件（例如 `devwho`，以及可选的 `devwho-setup`）。如果以后还会使用，请保留配置和 GitHub CLI 数据。
-
-
-核心的实现语言不限制调用它的 shell：所有实现都提供 `init bash` 和 `init zsh`。使用相应功能时仍需 Git 2.31 或更高版本以及可选的 `gh`/OpenSSH。Windows/PowerShell 和编辑器身份集成仍属实验或后续工作。
+更新 Go/Rust 时核验新归档后只替换已安装程序。现有 shell 保留环境和恢复状态；新开 shell 或重新执行 `devwho init bash`/`zsh` 加载新集成。配置、gh 数据和编辑器备份保留。卸载时先移除自己添加的启动行，再只移除已安装的已知程序；除非明确另行删除，否则保留配置与凭据。
 
 ## 共同行为与格式
 

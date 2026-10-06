@@ -4,6 +4,7 @@
 
 ## 0.1.0-rc.1 — First pre-release candidate
 
+- Upgraded official actions to Node 24/v7; enforced the complete eight-asset RC1 plan and canonical Ubuntu/Python3.11 source; omitted the constrained Linux Rust binary; recorded Mach-O minimum macOS requirements and selective checksums.
 - Added explicit candidate versions and versioned OS/CPU archive names, avoiding collisions between platform-specific Bash runtime inventories. Added checksum-verified release assembly that rejects corrupt downloads and conflicting duplicate names.
 - Environment-first TOML profiles with literal generic env and explicit unsets.
 - Reversible Bash/Zsh `setdev` / `unsetdev` and process-scoped `devwho exec`.

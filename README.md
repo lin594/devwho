@@ -49,6 +49,28 @@ unsetdev                 # Restore this terminal's identity from before switchin
 
 Only this terminal and programs subsequently launched from it receive the change. Other terminals and already-running applications keep their own settings. Switching in a terminal does **not** switch an existing VS Code window, Copilot, or browser login.
 
+## Tested candidate artifacts
+
+| Download | Target and execution evidence | Runtime requirement |
+|---|---|---|
+| `devwho-0.1.0rc1-go-linux-x86_64.tar.gz` (recommended) | Linux x86-64; Ubuntu CI and Debian WSL on FZ2 | Static Go core/setup; no Python, compiler or dynamic libc dependency |
+| `devwho-0.1.0rc1-go-darwin-arm64.tar.gz` (recommended) | macOS ARM64; hosted macOS 26.6.2 | Core/setup declare macOS **13.0** minimum; no Python/compiler |
+| `devwho-0.1.0rc1-rust-darwin-arm64.tar.gz` | macOS ARM64; hosted macOS 26.6.2 | Binary declares macOS **11.0** minimum; no Python/compiler |
+| `devwho-0.1.0rc1-bash-unix-source-linux-x86_64.tar.gz` / `devwho-0.1.0rc1-bash-unix-source-darwin-arm64.tar.gz` | Script distributions; Linux x86-64 and macOS ARM64 CI, real Bash/Zsh | Bash 3.2+, jq 1.6+, Perl 5.18+ and standard Unix utilities |
+| `devwho-0.1.0rc1.pyz`, wheel or sdist | Python distributions; Linux x86-64/macOS ARM64 with Python 3.11/3.13 CI | Python 3.11+; no third-party runtime Python packages |
+
+The macOS deployment minimum is encoded in each binary; it is distinct from the actual CI test host. `RUNTIME.txt` records both. RC1 omits the Linux Rust binary because its hosted build requires glibc 2.39; Linux users should choose static Go or build Rust from source. Source availability does not establish prebuilt support for an untested architecture. Windows/PowerShell, VS Code binding, Linux ARM64, macOS x86-64, Alpine/musl and live two-account remote authentication remain unverified.
+
+Download only your selected archive plus `SHA256SUMS` from the [pre-release](https://github.com/lin594/devwho/releases/tag/v0.1.0-rc.1). Select its exact checksum entry before checking, so unrelated platforms need not be downloaded:
+
+```sh
+asset=devwho-0.1.0rc1-go-linux-x86_64.tar.gz  # substitute the matching target above
+awk -v name="$asset" '$2 == name {print; found=1} END {if (!found) exit 1}' SHA256SUMS > selected.SHA256SUMS
+sha256sum -c selected.SHA256SUMS  # macOS: shasum -a 256 -c selected.SHA256SUMS
+```
+
+See the [complete install/update/remove guide](implementations/README.md). Git 2.31+, gh and SSH remain optional consumer requirements for their respective features.
+
 ## What you need today
 
 | Requirement | When you need it |
