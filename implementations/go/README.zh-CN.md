@@ -1,21 +1,26 @@
 # Go 兼容核心
 
-[English](README.md) | [简体中文](README.zh-CN.md)
+[English](README.md) | [简体中文](README.zh-CN.md) · [通用预编译安装、更新与卸载指南](../README.zh-CN.md#在-linux-或-macos-安装预编译-go-core)
 
 这是 [compatibility core v1](../../spec/compatibility-core-v1.zh-CN.md) 的独立实现，负责配置解析、校验、环境编译、可恢复切换、Bash/Zsh 渲染、子进程执行与诊断。运行时不调用 Python 或其他 DevWho 核心。
 
-Unix 使用 `exec` 保留 argv、退出状态和信号。Windows 进程执行明确不支持，请使用受支持的 Unix 环境。[成功的 CI 运行](../README.zh-CN.md)提供经过测试的开发构建产物，目前没有正式标签发布；平台验证以对应运行结果为准。
+Unix 使用 `exec` 保留 argv、退出状态和信号。Windows 进程执行明确不支持，请使用受支持的 Unix 环境。CI 运行会提供开发构建产物，目前没有正式标签发布；请查看成功的目标运行及其平台验证结果。
+
+托管二进制按平台构建，不是通用二进制。Go Linux 构建会因构建配置而静态链接或动态链接；请检查对应归档的 `RUNTIME.txt`，不要假设所有构建使用相同链接方式。目前不宣传 Linux ARM64 支持。macOS ARM64 二进制按实际 runner 架构构建；请确认对应目标运行及其 runtime 说明。
 
 ## 构建与使用
 
-构建需要 Go 1.23 或更新版本；编译后的可执行文件不需要 Go 或独立 TOML 包。Git、SSH、gh 仅在相应功能中作为可选工具使用。
+构建需要 Go 1.23 或更新版本；编译后的可执行文件不需要 Go 或独立 TOML 包。Git、SSH、gh 仅在相应功能中作为可选工具使用。新手下载和安装步骤见[通用指南](../README.zh-CN.md#在-linux-或-macos-安装预编译-go-core)。
 
 ```sh
 cd implementations/go
 go mod download
 go mod verify
 go test ./...
+# Linux：禁用 cgo 构建静态 Linux 可执行文件。
 CGO_ENABLED=0 go build -trimpath -o devwho .
+# macOS：使用平台工具链默认设置。
+# go build -trimpath -o devwho .
 ./devwho --config /absolute/path/config.toml list
 ./devwho --config /absolute/path/config.toml exec work -- git status
 eval "$(./devwho --config /absolute/path/config.toml init bash)"
@@ -43,6 +48,10 @@ unsetdev
 ## 可选独立编辑器
 
 通过 `go build -tags setup -o devwho-setup .` 构建无需 Python 的配置表单和版本检查 JSON API。它为所有核心输出标准 TOML，保留高级字段和有序 Git 值，并使用私有备份和原子保存。详见 [中文说明](SETUP.zh-CN.md) / [English](SETUP.md)。
+
+## 更新与卸载
+
+更新 `~/.local/bin/devwho` 中的预编译程序时，按[通用指南](../README.zh-CN.md#在-linux-或-macos-安装预编译-go-core)校验匹配归档并替换该文件；只有需要更新可选工具时才替换 `~/.local/bin/devwho-setup`。已初始化的 shell 会保留当前环境和恢复状态；打开新 shell，或重新运行 `devwho init` 并执行输出，以加载更新后的集成。配置、GitHub CLI 数据和 `.devwho-backups` 会保留。卸载时先从 shell 启动文件移除自行添加的 `devwho init` 行，再只删除已知安装程序，例如 `rm "$HOME/.local/bin/devwho"`；若已安装可选工具，再删除 `rm "$HOME/.local/bin/devwho-setup"`。
 
 ## 验证与限制
 

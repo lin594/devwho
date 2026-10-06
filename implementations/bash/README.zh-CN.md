@@ -1,6 +1,6 @@
 # DevWho Bash 实现
 
-[English](README.md) | [简体中文](README.zh-CN.md)
+[English](README.md) | [简体中文](README.zh-CN.md) · [选择核心与预编译安装指南](../README.zh-CN.md)
 
 本目录独立实现[兼容核心 v1](../../spec/compatibility-core-v1.zh-CN.md)：完整 TOML
 配置、公共命令、Bash/Zsh 集成、可恢复 JSON 状态、有序 Git 运行时配置、SSH/GitHub
@@ -30,6 +30,31 @@ bash implementations/bash/install.sh "$HOME/.local"
 安装器复制完整目录到 `PREFIX/lib/devwho-bash`，创建 `PREFIX/bin/devwho` 链接，并拒绝
 覆盖已有命令。也可直接运行源码目录中的命令。`config init` 以私有权限独占创建示例；
 使用前请修改示例身份。
+
+更新时，先确认 `PREFIX/bin/devwho` 是本安装器创建、且指向同一
+`PREFIX/lib/devwho-bash` 目录的符号链接。只删除这个已确认的链接，再使用相同 prefix
+重跑安装器；安装器会拒绝覆盖其他命令。已初始化的 shell 会保留当前环境和恢复状态；打开
+新 shell，或重新运行 `devwho init` 并执行输出，以加载更新后的集成代码。配置、GitHub CLI
+数据和配置前端备份单独保存。
+卸载默认的 `$HOME/.local` 安装时，先从 shell 启动文件中移除自行添加的 `devwho init`
+行，避免新终端调用已删除的命令；再删除已确认的链接和实现目录：
+
+```bash
+# 仅在默认安装的符号链接确实指向预期目标时更新。
+test "$(readlink "$HOME/.local/bin/devwho")" = "$HOME/.local/lib/devwho-bash/devwho" &&
+  rm "$HOME/.local/bin/devwho"
+bash implementations/bash/install.sh "$HOME/.local"
+```
+
+完全卸载时，删除相同的已知路径：
+
+```bash
+rm "$HOME/.local/bin/devwho"
+rm -r "$HOME/.local/lib/devwho-bash"
+```
+
+若使用其他 prefix，请替换为那个确切路径。除非另行决定清理，否则保留配置、GitHub CLI
+数据和备份。核心选项及可选预编译 Go 安装方式见[通用指南](../README.zh-CN.md)。
 
 命令与配置优先级遵循[公共参考](../../docs/zh-CN/reference.md)。激活始终离线。
 `doctor` 返回 0（通过）、1（不匹配）或 2（未验证），隐藏通用变量值、令牌及外部工具

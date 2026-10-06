@@ -13,7 +13,7 @@ The compatibility core makes existing Git, SSH, and GitHub CLI workflows follow 
 | Rust | [`implementations/rust`](rust/README.md) | Prebuilt executable needs no Python or compiler; source build needs Rust | Independent implementation; consult its README for build and platform coverage. |
 | Bash | [`implementations/bash`](bash/README.md) | Bash 3.2+, jq 1.6+, Perl 5.18+, standard OS utilities | Independent script implementation; Perl and jq are runtime requirements. |
 
-CI artifacts are development builds, not tagged releases. Their archive names and checksums are published with each workflow run; the archive targets the actual runner platform. No tag or hosted release is published. Go and Rust executables run without Python or a compiler at runtime. The Bash runtime invokes no Python core.
+CI artifacts are development builds, not tagged releases. Their archive names and checksums are published with each workflow run; the archive targets the actual runner platform. No tag or hosted release is published. Go and Rust executables run without Python or a compiler at runtime. The Bash runtime invokes no Python core. Binary archives include `RUNTIME.txt` with the actual OS, architecture, and system-library requirements for that build. Linux Rust artifacts require glibc symbols through 2.39 and `libgcc_s`; Alpine/musl is unsupported. Go Linux builds may be static or dynamically linked depending on the build. Check each archive's `RUNTIME.txt` before installing. Linux ARM64 is not advertised.
 
 ### Install the prebuilt Go core on Linux or macOS
 
@@ -52,6 +52,10 @@ CI artifacts are development builds, not tagged releases. Their archive names an
    ```
 
    `unsetdev` restores the shell baseline. The command pins this installed executable and the default configuration path for the current shell.
+
+For source-build instructions and verification, see the [Go guide](go/README.md). To update Go or Rust, verify and extract the newer matching artifact, then replace only `~/.local/bin/devwho`; replace `devwho-setup` only if you are updating that optional tool too. An initialized shell keeps its current environment and restoration state. Open a fresh shell or re-run `devwho init bash`/`zsh` and evaluate the output to load updated integration code. Configuration, GitHub CLI data, and setup-editor backups remain in place. For Bash updates and removal, follow the [Bash guide](bash/README.md).
+
+To remove a Go/Rust installation, first remove any `devwho init` line you added to a shell startup file, then remove only the executable(s) you placed in `~/.local/bin` (for example, `devwho` and optionally `devwho-setup`). Keep configuration and GitHub CLI data if you may use them again.
 
 
 The core language does not limit the calling shell: all implementations provide `init bash` and `init zsh`. Git 2.31+ and optional `gh`/OpenSSH remain consumer dependencies for the features that use them. Windows/PowerShell and editor identity integration remain experimental or deferred.

@@ -1,6 +1,6 @@
 # DevWho Bash implementation
 
-[English](README.md) | [简体中文](README.zh-CN.md)
+[English](README.md) | [简体中文](README.zh-CN.md) · [Choose a core and prebuilt Go install guide](../README.md)
 
 Independent implementation of the [compatibility core v1](../../spec/compatibility-core-v1.md).
 It includes strict TOML configuration, all public CLI commands, Bash/Zsh
@@ -41,6 +41,35 @@ creates `PREFIX/bin/devwho`. It refuses to replace an existing `devwho` symlink 
 file. Keep all installed files together. `config init` creates an example privately
 and exclusively; edit example identities before use. The executable can also be
 run directly without installation.
+
+To update, first confirm `PREFIX/bin/devwho` is the symlink created by this
+installer and points into that same `PREFIX/lib/devwho-bash` directory. Remove only
+that known symlink, then rerun the installer with the same prefix; it refuses to
+overwrite an unrelated command. An initialized shell keeps its current environment
+and restoration state; open a fresh shell or re-run `devwho init` and evaluate its
+output to load updated integration code. Configuration,
+GitHub CLI data, and setup-editor backups remain separate. To uninstall a default
+`$HOME/.local` install, remove the known symlink and then the known implementation
+directory. If you added a `devwho init` line to a shell startup file, remove that
+line first so new terminals do not call a removed command:
+
+```bash
+# Update the default install only if this is its expected symlink target.
+test "$(readlink "$HOME/.local/bin/devwho")" = "$HOME/.local/lib/devwho-bash/devwho" &&
+  rm "$HOME/.local/bin/devwho"
+bash implementations/bash/install.sh "$HOME/.local"
+```
+
+For a full uninstall, remove those same known paths instead:
+
+```bash
+rm "$HOME/.local/bin/devwho"
+rm -r "$HOME/.local/lib/devwho-bash"
+```
+
+If you used another prefix, substitute that exact prefix. Keep configuration,
+GitHub CLI data, and backups unless you intend to remove those separately. See the
+[common guide](../README.md) to compare core options and the optional prebuilt Go path.
 
 ## Behavior and validation
 

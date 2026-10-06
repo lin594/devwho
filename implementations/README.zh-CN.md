@@ -13,7 +13,7 @@
 | Rust | [`implementations/rust`](rust/README.md) | 预编译可执行文件运行时无需 Python 或编译器；源码构建需要 Rust | 独立实现；构建和平台覆盖请参阅其 README。 |
 | Bash | [`implementations/bash`](bash/README.md) | Bash 3.2+、jq 1.6+、Perl 5.18+ 和标准系统工具 | 独立脚本实现；Perl 和 jq 是运行时依赖。 |
 
-CI 产物是开发构建，不是正式标签发布。每次工作流运行会提供归档名称和校验和，归档目标对应实际运行平台。仓库尚未发布标签或托管发行版。Go/Rust 可执行文件运行时不需要 Python 或编译器；Bash 运行时不会调用 Python core。
+CI 产物是开发构建，不是正式标签发布。每次工作流运行会提供归档名称和校验和，归档目标对应实际运行平台。仓库尚未发布标签或托管发行版。Go/Rust 可执行文件运行时不需要 Python 或编译器；Bash 运行时不会调用 Python core。二进制归档含 `RUNTIME.txt`，记录该构建的实际操作系统、架构和系统库要求。Linux Rust 产物需要最高至 2.39 的 glibc 符号及 `libgcc_s`，不支持 Alpine/musl。Go Linux 构建会因构建配置而静态链接或动态链接。安装前请检查对应归档的 `RUNTIME.txt`。目前不宣传 Linux ARM64 支持。
 
 ### 在 Linux 或 macOS 安装预编译 Go core
 
@@ -52,6 +52,10 @@ CI 产物是开发构建，不是正式标签发布。每次工作流运行会�
    ```
 
    `unsetdev` 会恢复 shell 初始环境。该命令会为当前 shell 固定此可执行文件和默认配置路径。
+
+源码构建和验证说明见 [Go 指南](go/README.md)。更新 Go/Rust 时，校验并解压与平台匹配的新归档，然后只替换 `~/.local/bin/devwho`；只有同时更新可选工具时才替换 `devwho-setup`。已初始化的 shell 会保留当前环境和恢复状态。打开新 shell，或重新运行 `devwho init bash`/`zsh` 并执行输出，即可加载更新后的集成代码。配置、GitHub CLI 数据和配置前端备份会保留。Bash 的更新和卸载见 [Bash 指南](bash/README.zh-CN.md)。
+
+卸载 Go/Rust 时，先从 shell 启动文件中移除自行添加的 `devwho init` 行，再只删除安装在 `~/.local/bin` 的可执行文件（例如 `devwho`，以及可选的 `devwho-setup`）。如果以后还会使用，请保留配置和 GitHub CLI 数据。
 
 
 核心的实现语言不限制调用它的 shell：所有实现都提供 `init bash` 和 `init zsh`。使用相应功能时仍需 Git 2.31 或更高版本以及可选的 `gh`/OpenSSH。Windows/PowerShell 和编辑器身份集成仍属实验或后续工作。

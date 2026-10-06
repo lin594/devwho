@@ -1,0 +1,431 @@
+{
+  "config_toml": "version=1\n[profiles.atlas]\nunset_env=[\"CASE_DROP\"]\n[profiles.atlas.env]\nCASE_EMPTY=\"active\"\nCASE_MISSING=\"new\"\nCASE_PRESENT=\"atlas\"\n[profiles.boreal.env]\nCASE_PRESENT=\"boreal\"\n[profiles.runtime.git.config]\n\"core.editor\"=[\"first\", \"\"]\n",
+  "invalid_states": [
+    {
+      "id": "unknown-version",
+      "state": {
+        "version": 2,
+        "profile": "atlas",
+        "baseline": {
+          "DEVWHO_PROFILE": null
+        },
+        "managed": [
+          "DEVWHO_PROFILE"
+        ],
+        "runtime": null
+      },
+      "status": 1
+    },
+    {
+      "id": "boolean-version",
+      "state": {
+        "version": true,
+        "profile": "atlas",
+        "baseline": {
+          "DEVWHO_PROFILE": null
+        },
+        "managed": [
+          "DEVWHO_PROFILE"
+        ],
+        "runtime": null
+      },
+      "status": 1
+    },
+    {
+      "id": "managed-string",
+      "state": {
+        "version": 1,
+        "profile": "atlas",
+        "baseline": {
+          "DEVWHO_PROFILE": null
+        },
+        "managed": "DEVWHO_PROFILE",
+        "runtime": null
+      },
+      "status": 1
+    },
+    {
+      "id": "managed-element-type",
+      "state": {
+        "version": 1,
+        "profile": "atlas",
+        "baseline": {
+          "DEVWHO_PROFILE": null
+        },
+        "managed": [
+          7
+        ],
+        "runtime": null
+      },
+      "status": 1
+    },
+    {
+      "id": "managed-missing-baseline",
+      "state": {
+        "version": 1,
+        "profile": "atlas",
+        "baseline": {
+          "DEVWHO_PROFILE": null
+        },
+        "managed": [
+          "DEVWHO_PROFILE",
+          "CASE_ABSENT"
+        ],
+        "runtime": null
+      },
+      "status": 1
+    },
+    {
+      "id": "baseline-array",
+      "state": {
+        "version": 1,
+        "profile": "atlas",
+        "baseline": [],
+        "managed": [
+          "DEVWHO_PROFILE"
+        ],
+        "runtime": null
+      },
+      "status": 1
+    },
+    {
+      "id": "baseline-numeric-value",
+      "state": {
+        "version": 1,
+        "profile": "atlas",
+        "baseline": {
+          "DEVWHO_PROFILE": null,
+          "CASE_VALUE": 7
+        },
+        "managed": [
+          "DEVWHO_PROFILE"
+        ],
+        "runtime": null
+      },
+      "status": 1
+    },
+    {
+      "id": "baseline-nul",
+      "state": {
+        "version": 1,
+        "profile": "atlas",
+        "baseline": {
+          "DEVWHO_PROFILE": null,
+          "CASE_VALUE": "a\u0000b"
+        },
+        "managed": [
+          "DEVWHO_PROFILE"
+        ],
+        "runtime": null
+      },
+      "status": 1
+    },
+    {
+      "id": "baseline-runtime-variable",
+      "state": {
+        "version": 1,
+        "profile": "atlas",
+        "baseline": {
+          "DEVWHO_PROFILE": null,
+          "GIT_CONFIG_COUNT": "0"
+        },
+        "managed": [
+          "DEVWHO_PROFILE"
+        ],
+        "runtime": null
+      },
+      "status": 1
+    },
+    {
+      "id": "runtime-array",
+      "state": {
+        "version": 1,
+        "profile": "atlas",
+        "baseline": {
+          "DEVWHO_PROFILE": null
+        },
+        "managed": [
+          "DEVWHO_PROFILE"
+        ],
+        "runtime": []
+      },
+      "status": 1
+    },
+    {
+      "id": "runtime-missing-fields",
+      "state": {
+        "version": 1,
+        "profile": "atlas",
+        "baseline": {
+          "DEVWHO_PROFILE": null
+        },
+        "managed": [
+          "DEVWHO_PROFILE"
+        ],
+        "runtime": {}
+      },
+      "status": 1
+    },
+    {
+      "id": "runtime-incomplete-baseline",
+      "state": {
+        "version": 1,
+        "profile": "atlas",
+        "baseline": {
+          "DEVWHO_PROFILE": null
+        },
+        "managed": [
+          "DEVWHO_PROFILE"
+        ],
+        "runtime": {
+          "baseline": {
+            "GIT_CONFIG_COUNT": "1"
+          },
+          "before": [],
+          "owned": []
+        }
+      },
+      "status": 1
+    },
+    {
+      "id": "runtime-nonruntime-key",
+      "state": {
+        "version": 1,
+        "profile": "atlas",
+        "baseline": {
+          "DEVWHO_PROFILE": null
+        },
+        "managed": [
+          "DEVWHO_PROFILE"
+        ],
+        "runtime": {
+          "baseline": {
+            "CASE_VALUE": "bad"
+          },
+          "before": [],
+          "owned": []
+        }
+      },
+      "status": 1
+    },
+    {
+      "id": "runtime-pair-arity",
+      "state": {
+        "version": 1,
+        "profile": "atlas",
+        "baseline": {
+          "DEVWHO_PROFILE": null
+        },
+        "managed": [
+          "DEVWHO_PROFILE"
+        ],
+        "runtime": {
+          "baseline": {},
+          "before": [],
+          "owned": [
+            [
+              "core.editor"
+            ]
+          ]
+        }
+      },
+      "status": 1
+    },
+    {
+      "id": "runtime-pair-nonstring",
+      "state": {
+        "version": 1,
+        "profile": "atlas",
+        "baseline": {
+          "DEVWHO_PROFILE": null
+        },
+        "managed": [
+          "DEVWHO_PROFILE"
+        ],
+        "runtime": {
+          "baseline": {},
+          "before": [],
+          "owned": [
+            [
+              "core.editor",
+              false
+            ]
+          ]
+        }
+      },
+      "status": 1
+    }
+  ],
+  "operation_sequences": [
+    {
+      "id": "absent-empty-present-switch-restore",
+      "initial_env": {
+        "CASE_EMPTY": "",
+        "CASE_PRESENT": "original",
+        "CASE_DROP": "keep",
+        "CASE_UNRELATED": "untouched"
+      },
+      "operations": [
+        {
+          "activate": "atlas",
+          "expected_env": {
+            "CASE_EMPTY": "active",
+            "CASE_PRESENT": "atlas",
+            "CASE_MISSING": "new",
+            "CASE_UNRELATED": "untouched",
+            "DEVWHO_PROFILE": "atlas"
+          },
+          "expected_state": {
+            "version": 1,
+            "profile": "atlas",
+            "baseline": {
+              "CASE_DROP": "keep",
+              "CASE_EMPTY": "",
+              "CASE_MISSING": null,
+              "CASE_PRESENT": "original",
+              "DEVWHO_PROFILE": null
+            },
+            "managed": [
+              "CASE_DROP",
+              "CASE_EMPTY",
+              "CASE_MISSING",
+              "CASE_PRESENT",
+              "DEVWHO_PROFILE"
+            ],
+            "runtime": null
+          }
+        },
+        {
+          "activate": "atlas",
+          "expected_env": {
+            "CASE_EMPTY": "active",
+            "CASE_PRESENT": "atlas",
+            "CASE_MISSING": "new",
+            "CASE_UNRELATED": "untouched",
+            "DEVWHO_PROFILE": "atlas"
+          },
+          "expected_state": {
+            "version": 1,
+            "profile": "atlas",
+            "baseline": {
+              "CASE_DROP": "keep",
+              "CASE_EMPTY": "",
+              "CASE_MISSING": null,
+              "CASE_PRESENT": "original",
+              "DEVWHO_PROFILE": null
+            },
+            "managed": [
+              "CASE_DROP",
+              "CASE_EMPTY",
+              "CASE_MISSING",
+              "CASE_PRESENT",
+              "DEVWHO_PROFILE"
+            ],
+            "runtime": null
+          }
+        },
+        {
+          "activate": "boreal",
+          "expected_env": {
+            "CASE_EMPTY": "",
+            "CASE_PRESENT": "boreal",
+            "CASE_DROP": "keep",
+            "CASE_UNRELATED": "untouched",
+            "DEVWHO_PROFILE": "boreal"
+          },
+          "expected_state": {
+            "version": 1,
+            "profile": "boreal",
+            "baseline": {
+              "CASE_DROP": "keep",
+              "CASE_EMPTY": "",
+              "CASE_MISSING": null,
+              "CASE_PRESENT": "original",
+              "DEVWHO_PROFILE": null
+            },
+            "managed": [
+              "CASE_PRESENT",
+              "DEVWHO_PROFILE"
+            ],
+            "runtime": null
+          }
+        },
+        {
+          "activate": null,
+          "expected_env": {
+            "CASE_EMPTY": "",
+            "CASE_PRESENT": "original",
+            "CASE_DROP": "keep",
+            "CASE_UNRELATED": "untouched"
+          },
+          "expected_state": null
+        }
+      ]
+    },
+    {
+      "id": "ordered-runtime-empty-value-restore",
+      "initial_env": {
+        "GIT_CONFIG_COUNT": "1",
+        "GIT_CONFIG_KEY_0": "http.proxy",
+        "GIT_CONFIG_VALUE_0": "baseline"
+      },
+      "operations": [
+        {
+          "activate": "runtime",
+          "expected_env": {
+            "GIT_CONFIG_COUNT": "3",
+            "GIT_CONFIG_KEY_0": "http.proxy",
+            "GIT_CONFIG_VALUE_0": "baseline",
+            "DEVWHO_PROFILE": "runtime",
+            "GIT_CONFIG_KEY_1": "core.editor",
+            "GIT_CONFIG_VALUE_1": "first",
+            "GIT_CONFIG_KEY_2": "core.editor",
+            "GIT_CONFIG_VALUE_2": ""
+          },
+          "expected_state": {
+            "version": 1,
+            "profile": "runtime",
+            "baseline": {
+              "DEVWHO_PROFILE": null
+            },
+            "managed": [
+              "DEVWHO_PROFILE"
+            ],
+            "runtime": {
+              "baseline": {
+                "GIT_CONFIG_COUNT": "1",
+                "GIT_CONFIG_KEY_0": "http.proxy",
+                "GIT_CONFIG_VALUE_0": "baseline"
+              },
+              "before": [
+                [
+                  "http.proxy",
+                  "baseline"
+                ]
+              ],
+              "owned": [
+                [
+                  "core.editor",
+                  "first"
+                ],
+                [
+                  "core.editor",
+                  ""
+                ]
+              ]
+            }
+          }
+        },
+        {
+          "activate": null,
+          "expected_env": {
+            "GIT_CONFIG_COUNT": "1",
+            "GIT_CONFIG_KEY_0": "http.proxy",
+            "GIT_CONFIG_VALUE_0": "baseline"
+          },
+          "expected_state": null
+        }
+      ]
+    }
+  ]
+}

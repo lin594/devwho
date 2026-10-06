@@ -43,6 +43,7 @@ def main():
         "conformance.test_vectors",
         "conformance.test_processes",
         "conformance.test_dotenv",
+        "conformance.test_state_contract",
     ]
     loaded = unittest.defaultTestLoader.loadTestsFromNames(names)
     # Python archive tests remain in its own suite. Shared tests drive real

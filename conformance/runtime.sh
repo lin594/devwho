@@ -62,6 +62,19 @@ for kind in valid invalid; do
 done
 test ! -e sentinel
 
+jq -j .config_toml "$fixtures/state-contract.json" > state.toml
+count=$(jq '.invalid_states|length' "$fixtures/state-contract.json")
+for ((i=0; i<count; i++)); do
+    jq --argjson i "$i" '.invalid_states[$i].state' "$fixtures/state-contract.json" > state.json
+    if "$core" --config state.toml internal transition --shell bash --restore < state.json > out 2> err; then
+        printf 'Accepted invalid state vector %s\n' "$i" >&2; exit 1
+    fi
+    test ! -s out
+done
+jq -n '{version:1,profile:"atlas",runtime:null,managed:["DEVWHO_PROFILE"],baseline:{DEVWHO_PROFILE:null,CASE_PAYLOAD:("x"*1048576)}}' > state.json
+if "$core" --config state.toml internal transition --shell bash --restore < state.json > out 2> err; then exit 1; fi
+test ! -s out
+
 cat > session.toml <<'EOF'
 version=1
 [settings]
@@ -87,14 +100,40 @@ for shell in /bin/bash /bin/zsh; do
       test "$DEVWHO_PROFILE:$APP_ACCOUNT" = work:work
       test "$(git config user.email)" = work@example.test
       "$CORE" --config "$PWD/session.toml" doctor --offline >/dev/null
+      # Preserve a third-party pair appended after the owned block.
+      tail_index=$GIT_CONFIG_COUNT
+      export "GIT_CONFIG_KEY_$tail_index=core.editor" "GIT_CONFIG_VALUE_$tail_index=third-party"
+      export GIT_CONFIG_COUNT=$((tail_index+1))
       setdev personal
       test "$(git config user.email)" = personal@example.test
       unsetdev
       test "$APP_ACCOUNT" = before
       test -z "${DEVWHO_PROFILE+x}"
       test "$HTTPS_PROXY" = http://proxy.example:8080
+      test "$GIT_CONFIG_COUNT:$GIT_CONFIG_KEY_0:$GIT_CONFIG_VALUE_0" = 1:core.editor:third-party
+      (
+        unset APP_ACCOUNT
+        APP_ACCOUNT=(one two)
+        if setdev work; then exit 21; fi
+        test "${#APP_ACCOUNT[@]}" = 2
+        test -z "${DEVWHO_PROFILE+x}"
+        test "$GIT_CONFIG_COUNT" = 1
+      )
+      (
+        readonly APP_ACCOUNT
+        if setdev work; then exit 22; fi
+        test "$APP_ACCOUNT" = before
+        test -z "${DEVWHO_PROFILE+x}"
+        test "$GIT_CONFIG_COUNT" = 1
+      )
+      if setdev unknown; then exit 23; fi
+      test -z "${DEVWHO_PROFILE+x}"
     '
 done
+
+sed 's/shortcut_profile/default_profile/' session.toml > default.toml
+"$core" --config "$work/default.toml" init bash > init.sh
+/bin/bash -c 'set -e; . ./init.sh; test "$DEVWHO_PROFILE" = work; setdev personal; unsetdev; test "$DEVWHO_PROFILE" = work'
 
 # Real Git replay: the original author survives while the selected committer changes.
 git init -q -b main replay

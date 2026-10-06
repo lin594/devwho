@@ -1,21 +1,26 @@
 # Go compatibility core
 
-[English](README.md) | [简体中文](README.zh-CN.md)
+[English](README.md) | [简体中文](README.zh-CN.md) · [Common prebuilt install/update/remove guide](../README.md#install-the-prebuilt-go-core-on-linux-or-macos)
 
 An independent implementation of [compatibility core v1](../../spec/compatibility-core-v1.md). It parses profiles, validates and compiles adapters, manages reversible shell state, renders Bash/Zsh integration, executes child commands, and diagnoses consumers. Its runtime does not invoke Python or another DevWho core.
 
-Unix process execution uses `exec`, preserving argv, process exit status, and signals. Windows process execution is explicitly unsupported; use a supported Unix environment. [Successful CI runs](../../implementations/README.md) provide tested development artifacts; there is no tagged release. Check the target run for platform validation.
+Unix process execution uses `exec`, preserving argv, process exit status, and signals. Windows process execution is explicitly unsupported; use a supported Unix environment. CI runs provide development artifacts; there is no tagged release. Check a successful target run for platform validation.
+
+Hosted binaries are platform-specific, not universal. Go Linux builds may be static or dynamically linked depending on build configuration; inspect the artifact's `RUNTIME.txt` for its exact system requirements rather than assuming all builds share one linkage model. Linux ARM64 is not advertised. macOS ARM64 binaries use the actual runner architecture; check the target run and its runtime note.
 
 ## Build and use
 
-Go 1.23 or newer is the build dependency; no Go toolchain or TOML package is required by the resulting executable. Git, SSH, and gh are optional consumer tools used only by their corresponding features. Bash/Zsh integration uses the same functions and profile files as Python.
+Go 1.23 or newer is the build dependency; no Go toolchain or TOML package is required by the resulting executable. Git, SSH, and gh are optional consumer tools used only by their corresponding features. Bash/Zsh integration uses the same functions and profile files as Python. Beginner-friendly artifact installation steps are in the [common guide](../README.md#install-the-prebuilt-go-core-on-linux-or-macos).
 
 ```sh
 cd implementations/go
 go mod download
 go mod verify
 go test ./...
+# Linux: build without cgo for a static Linux executable.
 CGO_ENABLED=0 go build -trimpath -o devwho .
+# macOS: use platform toolchain defaults instead.
+# go build -trimpath -o devwho .
 ./devwho --config /absolute/path/config.toml list
 ./devwho --config /absolute/path/config.toml exec work -- git status
 eval "$(./devwho --config /absolute/path/config.toml init bash)"
@@ -47,6 +52,10 @@ The literal grammar accepts UTF-8 LF/CRLF, comments, `export KEY=VALUE`, unquote
 ## Optional standalone editor
 
 Build the Python-free configuration form and revision-checked JSON API with `go build -tags setup -o devwho-setup .`. It writes standard TOML for all cores, preserves advanced fields and ordered Git values, and uses private backups and atomic revision-checked saves. [Editor instructions](SETUP.md) / [中文说明](SETUP.zh-CN.md).
+
+## Update and uninstall
+
+To update a prebuilt install at `~/.local/bin/devwho`, verify the matching artifact as described in the [common guide](../README.md#install-the-prebuilt-go-core-on-linux-or-macos) and replace that file. Replace `~/.local/bin/devwho-setup` only if updating that optional tool. An initialized shell keeps its current environment and restoration state; open a fresh shell or re-run `devwho init` and evaluate its output to load the updated integration. Configuration, GitHub CLI data, and `.devwho-backups` remain in place. To uninstall, first remove any `devwho init` line you added to a shell startup file, then remove only the known installed binaries, for example `rm "$HOME/.local/bin/devwho"` and, if installed, `rm "$HOME/.local/bin/devwho-setup"`.
 
 ## Verification and limitations
 
