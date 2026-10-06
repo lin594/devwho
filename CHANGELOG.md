@@ -2,8 +2,9 @@
 
 [简体中文](CHANGELOG.zh-CN.md)
 
-## 0.1.0 — Unreleased
+## 0.1.0-rc.1 — First pre-release candidate
 
+- Added explicit candidate versions and versioned OS/CPU archive names, avoiding collisions between platform-specific Bash runtime inventories. Added checksum-verified release assembly that rejects corrupt downloads and conflicting duplicate names.
 - Environment-first TOML profiles with literal generic env and explicit unsets.
 - Reversible Bash/Zsh `setdev` / `unsetdev` and process-scoped `devwho exec`.
 - Git runtime identity, signing configuration, Git SSH command and GitHub CLI context.
@@ -17,4 +18,4 @@
 - Separated the draft native environment convention from the compatibility core. Added independent Go, Rust, and Bash cores and executable cross-core conformance, including restoration-state interchange. A stdlib-only native reference consumer example is included; third-party adoption is not claimed.
 - Defined a draft single-variable context interface and implemented optional explicit literal dotenv input across all four cores, while retaining full TOML support. Added an optional Go terminal configuration frontend with revision-checked replacement and private backups.
 
-PowerShell and VS Code identity integration are deferred experiments. No release tag or package registry publication is provided yet.
+PowerShell and VS Code identity integration are deferred experiments. Candidate artifacts and checksums are attached to the GitHub pre-release; package registry publication is deferred.

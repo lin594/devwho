@@ -9,29 +9,29 @@
 | 实现 | 源码与分发 | 最终用户所需环境 | 说明 |
 |---|---|---|---|
 | Python | [`src/devwho`](../src/devwho)、[`bin/devwho`](../bin/devwho) | Python 3.11 或更高版本；运行时不需要第三方 Python 包 | 参考实现；保留现有 Python 安装说明。 |
-| Go | [`implementations/go`](go/README.md) | 预编译可执行文件运行时无需 Python 或编译器；源码构建需要 Go | 推荐初学者使用；`complete-cores-ubuntu-latest` 和 `complete-cores-macos-latest` 工作流运行中附有开发构建产物，下载需登录 GitHub。 |
+| Go | [`implementations/go`](go/README.md) | 预编译可执行文件运行时无需 Python 或编译器；源码构建需要 Go | 推荐初学者使用；经过验证的候选二进制见[预发行](https://github.com/lin594/devwho/releases/tag/v0.1.0-rc.1)。 |
 | Rust | [`implementations/rust`](rust/README.md) | 预编译可执行文件运行时无需 Python 或编译器；源码构建需要 Rust | 独立实现；构建和平台覆盖请参阅其 README。 |
 | Bash | [`implementations/bash`](bash/README.md) | Bash 3.2+、jq 1.6+、Perl 5.18+ 和标准系统工具 | 独立脚本实现；Perl 和 jq 是运行时依赖。 |
 
-CI 产物是开发构建，不是正式标签发布。每次工作流运行会提供归档名称和校验和，归档目标对应实际运行平台。仓库尚未发布标签或托管发行版。Go/Rust 可执行文件运行时不需要 Python 或编译器；Bash 运行时不会调用 Python core。二进制归档含 `RUNTIME.txt`，记录该构建的实际操作系统、架构和系统库要求。Linux Rust 产物需要最高至 2.39 的 glibc 符号及 `libgcc_s`，不支持 Alpine/musl。Go Linux 构建会因构建配置而静态链接或动态链接。安装前请检查对应归档的 `RUNTIME.txt`。目前不宣传 Linux ARM64 支持。
+[v0.1.0-rc.1 预发行](https://github.com/lin594/devwho/releases/tag/v0.1.0-rc.1)附已验证产物、统一校验清单和记录最终提交及 CI 来源的 RELEASE-MANIFEST.json。产品版本使用 0.1.0-rc.1；Python 包及产物文件名使用等价的 PEP 440 写法 0.1.0rc1。CI 产物仍为开发构建。Go/Rust 可执行文件运行时不需要 Python 或编译器；Bash 运行时不会调用 Python core。二进制归档含 `RUNTIME.txt`，记录该构建的实际操作系统、架构和系统库要求。Linux Rust 产物需要最高至 2.39 的 glibc 符号及 `libgcc_s`，不支持 Alpine/musl。Go Linux 构建会因构建配置而静态链接或动态链接。安装前请检查对应归档的 `RUNTIME.txt`。目前不宣传 Linux ARM64 支持。
 
 ### 在 Linux 或 macOS 安装预编译 Go core
 
-1. 打开仓库的 [Actions 工作流](https://github.com/lin594/devwho/actions/workflows/ci.yml)，选择对应提交成功的 CI 运行，再下载 `complete-cores-ubuntu-latest` 或 `complete-cores-macos-latest` artifact。解压下载的 GitHub artifact ZIP。
+1. 打开[预发行](https://github.com/lin594/devwho/releases/tag/v0.1.0-rc.1)，将 SHA256SUMS、RELEASE-MANIFEST.json 及校验清单列出的产物下载到同一目录。核验完整下载集合后，选择匹配操作系统与 CPU 的 Go 归档。成功的 Actions 运行仍提供开发构建。
 2. 在解压后的目录中，先校验归档文件，再解包：
 
    ```sh
-   cd /path/to/extracted-artifact/dist/cores
+   cd /path/to/downloaded-release-assets
    sha256sum -c SHA256SUMS       # Linux
    shasum -a 256 -c SHA256SUMS  # macOS
    ```
 
-3. 解包与 runner 对应的 Go 归档。Linux x86-64 使用 `devwho-go-linux-x86_64.tar.gz`；macOS 请使用 `SHA256SUMS` 中该 runner 对应的确切 `devwho-go-darwin-ARCH.tar.gz` 文件名。例如：
+3. 解包与 runner 对应的 Go 归档。Linux x86-64 使用 `devwho-0.1.0rc1-go-linux-x86_64.tar.gz`；macOS 请使用 `SHA256SUMS` 中该 runner 对应的确切 `devwho-0.1.0rc1-go-darwin-ARCH.tar.gz` 文件名。例如：
 
    ```sh
-   tar -xzf devwho-go-linux-x86_64.tar.gz
-   cd devwho-go-linux-x86_64
-   # macOS 请替换为匹配的归档名，并 cd 到 devwho-go-darwin-ARCH 目录。
+   tar -xzf devwho-0.1.0rc1-go-linux-x86_64.tar.gz
+   cd devwho-0.1.0rc1-go-linux-x86_64
+   # macOS 请替换为匹配的归档名，并 cd 到 devwho-0.1.0rc1-go-darwin-ARCH 目录。
    ```
 
    归档中包含 `devwho` 和可选的独立配置编辑器 `devwho-setup`。可将其中一个或两者安装到用户目录：

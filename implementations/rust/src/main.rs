@@ -330,7 +330,7 @@ fn main_run() -> Result<i32> {
                 return Ok(0);
             }
             "--version" => {
-                println!("devwho 0.1.0");
+                println!("devwho {}", env!("CARGO_PKG_VERSION"));
                 return Ok(0);
             }
             _ => break,

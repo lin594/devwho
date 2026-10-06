@@ -9,13 +9,15 @@ import re
 import shutil
 import subprocess
 import tarfile
+import tomllib
 
 ROOT = Path(__file__).resolve().parents[1]
+VERSION = tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))["project"]["version"]
 
 
 def runtime_requirements(directory, language, target):
     lines = [
-        f"DevWho {language} development artifact",
+        f"DevWho {VERSION} {language} artifact",
         f"Target: {target}",
         "Test evidence: consult the originating CI run or local build record.",
         "Only the recorded OS/CPU target is validated; this is not a universal binary.",
@@ -108,8 +110,8 @@ def main():
             if (source / "licenses").is_dir():
                 shutil.copytree(source / "licenses", dest / "licenses")
         runtime_requirements(dest, language, target)
-        suffix = "unix-source" if language == "bash" else target
-        archive = args.output / f"devwho-{language}-{suffix}.tar.gz"
+        suffix = "unix-source-" + target if language == "bash" else target
+        archive = args.output / f"devwho-{VERSION}-{language}-{suffix}.tar.gz"
         with tarfile.open(archive, "w:gz") as tar:
             tar.add(dest, arcname=archive.name.removesuffix(".tar.gz"))
         sums.append(f"{hashlib.sha256(archive.read_bytes()).hexdigest()}  {archive.name}\n")

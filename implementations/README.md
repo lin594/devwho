@@ -9,29 +9,29 @@ The compatibility core makes existing Git, SSH, and GitHub CLI workflows follow 
 | Implementation | Source and distribution | End-user requirements | Notes |
 |---|---|---|---|
 | Python | [`src/devwho`](../src/devwho), [`bin/devwho`](../bin/devwho) | Python 3.11+; no third-party runtime Python packages | Reference implementation; existing Python installation instructions remain available. |
-| Go | [`implementations/go`](go/README.md) | Prebuilt executable needs no Python or compiler; source build needs Go | Recommended for beginners; development artifacts are attached to `complete-cores-ubuntu-latest` and `complete-cores-macos-latest` workflow runs; download requires GitHub sign-in. |
+| Go | [`implementations/go`](go/README.md) | Prebuilt executable needs no Python or compiler; source build needs Go | Recommended for beginners; tested candidate binaries are attached to the [pre-release](https://github.com/lin594/devwho/releases/tag/v0.1.0-rc.1). |
 | Rust | [`implementations/rust`](rust/README.md) | Prebuilt executable needs no Python or compiler; source build needs Rust | Independent implementation; consult its README for build and platform coverage. |
 | Bash | [`implementations/bash`](bash/README.md) | Bash 3.2+, jq 1.6+, Perl 5.18+, standard OS utilities | Independent script implementation; Perl and jq are runtime requirements. |
 
-CI artifacts are development builds, not tagged releases. Their archive names and checksums are published with each workflow run; the archive targets the actual runner platform. No tag or hosted release is published. Go and Rust executables run without Python or a compiler at runtime. The Bash runtime invokes no Python core. Binary archives include `RUNTIME.txt` with the actual OS, architecture, and system-library requirements for that build. Linux Rust artifacts require glibc symbols through 2.39 and `libgcc_s`; Alpine/musl is unsupported. Go Linux builds may be static or dynamically linked depending on the build. Check each archive's `RUNTIME.txt` before installing. Linux ARM64 is not advertised.
+The [v0.1.0-rc.1 pre-release](https://github.com/lin594/devwho/releases/tag/v0.1.0-rc.1) includes tested artifacts, one combined checksum list, and RELEASE-MANIFEST.json recording the final commit and originating CI run. Product versions use 0.1.0-rc.1; Python packaging and asset filenames use its PEP 440 equivalent 0.1.0rc1. CI artifacts remain development builds. Go and Rust executables run without Python or a compiler at runtime. The Bash runtime invokes no Python core. Binary archives include `RUNTIME.txt` with the actual OS, architecture, and system-library requirements for that build. Linux Rust artifacts require glibc symbols through 2.39 and `libgcc_s`; Alpine/musl is unsupported. Go Linux builds may be static or dynamically linked depending on the build. Check each archive's `RUNTIME.txt` before installing. Linux ARM64 is not advertised.
 
 ### Install the prebuilt Go core on Linux or macOS
 
-1. Open the repository’s [Actions workflow](https://github.com/lin594/devwho/actions/workflows/ci.yml), choose a successful CI run for the desired commit, then download its `complete-cores-[OS]` artifact. Extract the downloaded GitHub artifact ZIP.
+1. Open the [pre-release](https://github.com/lin594/devwho/releases/tag/v0.1.0-rc.1), download SHA256SUMS, RELEASE-MANIFEST.json and the assets listed in SHA256SUMS into one directory. Choose the Go archive matching your operating system and CPU after checking the complete downloaded set. Development builds are still available through successful Actions runs.
 2. In the extracted directory, verify the archive checksum before unpacking it:
 
    ```sh
-   cd /path/to/extracted-artifact/dist/cores
+   cd /path/to/downloaded-release-assets
    sha256sum -c SHA256SUMS       # Linux
    shasum -a 256 -c SHA256SUMS  # macOS
    ```
 
-3. Unpack the Go archive for your runner. Linux x86-64 uses `devwho-go-linux-x86_64.tar.gz`; macOS uses the exact `devwho-go-darwin-ARCH.tar.gz` filename listed in `SHA256SUMS` for that runner. For example:
+3. Unpack the Go archive for your runner. Linux x86-64 uses `devwho-0.1.0rc1-go-linux-x86_64.tar.gz`; macOS uses the exact `devwho-0.1.0rc1-go-darwin-ARCH.tar.gz` filename listed in `SHA256SUMS` for that runner. For example:
 
    ```sh
-   tar -xzf devwho-go-linux-x86_64.tar.gz
-   cd devwho-go-linux-x86_64
-   # On macOS, substitute its matching archive and cd into devwho-go-darwin-ARCH.
+   tar -xzf devwho-0.1.0rc1-go-linux-x86_64.tar.gz
+   cd devwho-0.1.0rc1-go-linux-x86_64
+   # On macOS, substitute its matching archive and cd into devwho-0.1.0rc1-go-darwin-ARCH.
    ```
 
    The archive contains `devwho` and the optional `devwho-setup` standalone editor. Install either or both into a user-owned directory:

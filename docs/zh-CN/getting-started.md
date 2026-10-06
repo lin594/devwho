@@ -28,12 +28,12 @@ git clone https://github.com/lin594/devwho.git
 cd devwho
 python3 scripts/build_zipapp.py
 mkdir -p "$HOME/.local/bin"
-install -m 755 dist/devwho-0.1.0.pyz "$HOME/.local/bin/devwho"
+install -m 755 dist/devwho-0.1.0rc1.pyz "$HOME/.local/bin/devwho"
 export PATH="$HOME/.local/bin:$PATH"
 devwho --version
 ```
 
-你应该会看到 `devwho 0.1.0`。安装文件中包含 DevWho，但运行时仍使用系统中的 Python 3.11 或更新版本。运行时不需要第三方依赖。如果之后想自行更新，请保留这份源码目录。
+你应该会看到 `devwho 0.1.0-rc.1`。安装文件中包含 DevWho，但运行时仍使用系统中的 Python 3.11 或更新版本。运行时不需要第三方依赖。如果之后想自行更新，请保留这份源码目录。
 
 如果你已经在使用 pipx，也可以在源码目录中运行 `pipx install .`。确保 pipx 的可执行文件目录已加入 PATH，然后运行 `devwho --version` 检查。请选择一种安装方式，以便清楚之后要更新哪个可执行文件。目前尚无 PyPI 正式版本；以上步骤安装的是本仓库中的代码。
 
@@ -129,7 +129,7 @@ DevWho 只会输出初始化代码，不会自行修改 shell 启动文件。保
 ```sh
 git pull --ff-only
 python3 scripts/build_zipapp.py
-install -m 755 dist/devwho-0.1.0.pyz "$HOME/.local/bin/devwho"
+install -m 755 dist/devwho-0.1.0rc1.pyz "$HOME/.local/bin/devwho"
 ```
 
 然后打开新终端并运行 `devwho --version`。使用 pipx 时，在更新后的源码目录中运行 `pipx install --force .`。

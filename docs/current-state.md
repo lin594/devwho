@@ -1,6 +1,6 @@
 # Project status
 
-DevWho provides four independent implementations of a per-shell compatibility core: Python, Go, Rust, and Bash. Version 0.1.0 remains unreleased: there is no tag, hosted release, or package registry publication. Development artifacts are attached to CI runs; downloading them requires GitHub sign-in. Check the workflow run itself for hosted results.
+DevWho provides four independent implementations of a per-shell compatibility core: Python, Go, Rust, and Bash. The first tagged candidate is [v0.1.0-rc.1](https://github.com/lin594/devwho/releases/tag/v0.1.0-rc.1); package registry publication is deferred. Development artifacts are attached to CI runs; downloading them requires GitHub sign-in. Check the workflow run itself for hosted results.
 
 ## Separate tracks
 
@@ -22,4 +22,4 @@ Activation and inspection do not rewrite Git or SSH configuration, move credenti
 
 Python requires Python 3.11+. Go and Rust executable runtime does not require Python or a compiler. Bash requires Bash 3.2+, jq 1.6+, and Perl 5.18+. The `cores` CI job builds and tests Ubuntu/macOS artifacts; check [hosted workflow results](https://github.com/lin594/devwho/actions/workflows/ci.yml), and use each implementation's verification record for local evidence and coverage limitations. The workflow matrix alone is not evidence that every job passed.
 
-Go/Rust artifacts are development builds, not tagged releases; they target the actual runner platform and are checksummed. CI downloads require GitHub sign-in. The optional Go setup editor's local execution evidence covers Linux x86-64; Windows writes are unsupported. Windows PowerShell and VS Code identity integration remain experimental/deferred.
+Go/Rust candidate artifacts are attached to the pre-release; development artifacts are also available through CI; they target the actual runner platform and are checksummed. CI downloads require GitHub sign-in. The optional Go setup editor's local execution evidence covers Linux x86-64; Windows writes are unsupported. Windows PowerShell and VS Code identity integration remain experimental/deferred.

@@ -60,7 +60,7 @@ if [ "$__devwho_explicit_env_file" = true ]; then
  __devwho_config=$__devwho_env_file
 elif [ "$__devwho_explicit_env_profile" = true ]; then __devwho_die '--env-profile requires --env-file'; fi
 if [ "$__devwho_explicit_env_profile" = true ] && [ -z "$__devwho_env_profile" ]; then __devwho_die '--env-profile requires a nonempty name'; fi
-case ${1-} in --help|-h) printf '%s\n' 'Usage: devwho [--config PATH] COMMAND' 'Optional dotenv frontend: --env-file PATH [--env-profile NAME]' 'Commands: list, show PROFILE, current [--verbose], doctor [PROFILE] [--offline],' '  exec PROFILE -- COMMAND..., config path|init, init bash|zsh'; exit 0;; --version) printf '%s\n' 'devwho 0.1.0 (Bash compatibility core v1)'; exit 0;; esac
+case ${1-} in --help|-h) printf '%s\n' 'Usage: devwho [--config PATH] COMMAND' 'Optional dotenv frontend: --env-file PATH [--env-profile NAME]' 'Commands: list, show PROFILE, current [--verbose], doctor [PROFILE] [--offline],' '  exec PROFILE -- COMMAND..., config path|init, init bash|zsh'; exit 0;; --version) printf '%s\n' 'devwho 0.1.0-rc.1 (Bash compatibility core v1)'; exit 0;; esac
 [ $# -gt 0 ] || __devwho_usage_error 'a command is required; use --help'
 __devwho_command=$1; shift
 if [ "${1-}" = --help ] || [ "${1-}" = -h ]; then

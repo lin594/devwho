@@ -1,7 +1,23 @@
 # Open-source readiness
 
-Assessment: 2026-10-06. Version: 0.1.0, unreleased. This checklist describes the development branch. Source hosting does not constitute a tagged or packaged release. The [CI workflow](https://github.com/lin594/devwho/actions/workflows/ci.yml) records hosted validation for each revision. The `cores` job builds and tests Ubuntu/macOS artifacts; inspect that run for its actual result before release decisions. Artifacts are development builds, not tagged releases.
+Assessment: 2026-10-06. Candidate: v0.1.0-rc.1. This checklist describes the development branch. Source hosting does not constitute a tagged or packaged release. The [CI workflow](https://github.com/lin594/devwho/actions/workflows/ci.yml) records hosted validation for each revision. The `cores` job builds and tests Ubuntu/macOS artifacts; inspect that run for its actual result before release decisions. The [candidate release](https://github.com/lin594/devwho/releases/tag/v0.1.0-rc.1) records its final commit, verified CI run, and tested artifact checksums.
 
+## First candidate verification on FZ2
+
+The v0.1.0-rc.1 candidate was built and exercised on FZ2 under Debian WSL, Linux x86-64, with real Bash/Zsh/Git:
+
+- Python regression: 80 tests passed, with one expected Zsh-only case skipped in the Bash group.
+- Python, Go, Rust and Bash: each passed 71 shared contract cases, including peer-state interchange; the same expected Bash-group skip applies.
+- Go core/setup unit tests and vet, Rust locked unit tests/build, Bash's 20 implementation tests, and the native example's 9 selection cases plus four producer integrations passed.
+- Ruff lint/format and Python compilation passed. Python wheel/sdist/zipapp and core archives built and their checksums verified.
+- Go, Rust and Bash ran in a network-disabled Debian runtime container with no Python or language compilers. The Go setup frontend passed its read/replace fixture there.
+- Local build tools were Python 3.13.5, Go 1.27.1, Cargo 1.90.0 and rustc 1.95.0. The local Rust archive differs from the hosted Ubuntu archive; the release uses its recorded CI runtime inventory.
+
+The candidate version is 0.1.0-rc.1; Python metadata and asset names use the equivalent PEP 440 spelling 0.1.0rc1. Core archive names include version and tested target, including Bash, to avoid cross-runner collisions. The release assembly script verifies input checksums and rejects differing duplicates, then produces one checksum list and final-commit manifest.
+
+Before publishing, the final revision must pass the complete hosted matrix; download and install the selected hosted artifacts on FZ2, inspect the final audit outcome, and attach the final commit/CI/checksum evidence to an explicitly marked pre-release. Local validation does not establish macOS support. The originating macOS CI run must supply that evidence.
+
+[简体中文候选验收](zh-CN/release-readiness.md)
 ## Product and architecture
 
 Per-shell developer identity through environment variables. Independent Python, Go, Rust, and Bash cores compile TOML profiles (or explicit dotenv input) to a set/unset environment patch consumed by one shell or child process tree. No global active-profile file exists. Python requires Python 3.11+; Go/Rust executables have no Python/compiler runtime requirement; Bash requires Bash 3.2+, jq 1.6+, and Perl 5.18+.
@@ -50,6 +66,6 @@ Source/examples use fictional identities. Local design notes, profiles and backu
 - Inherited shells restore their inherited baseline; they do not know a parent's earlier baseline.
 - No directory auto-switching, daemon, GUI, remote identity guard, previous-profile stack or secret-provider integration is included.
 - The project uses MIT licensing. Private vulnerability reports use the entry point in [SECURITY.md](../SECURITY.md).
-- No release tag, hosted release or package registry publication is included in the source push.
+- The first release is explicitly marked as a pre-release. Package registry publication is deferred.
 
 The Python, Go, Rust, and Bash shell/process models have recorded local acceptance coverage; each implementation README identifies its own limits. Confirm hosted CI and transport authentication separately before relying on an additional platform or live account setup. The optional native Go setup frontend has Linux x86-64 local evidence; Windows writes are unsupported. A native reference consumer example exists, but it does not establish third-party adoption.

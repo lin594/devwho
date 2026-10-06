@@ -61,11 +61,11 @@ unsetdev                 # 恢复切换前此终端的身份设置
 
 运行时**不需要第三方 Python 依赖**。安装步骤使用你已有的 Python；不需要 pipx、Node.js 或 Docker。Windows PowerShell 集成仍在计划中；目前 Windows 用户请使用 WSL。
 
-**没有安装 Python？** 可以从成功的 [CI 运行](https://github.com/lin594/devwho/actions/workflows/ci.yml)下载经过测试的 Go/Rust 构建产物，也可以安装 [Bash core](implementations/bash/README.zh-CN.md)。详见[下载、构建与实际依赖](implementations/README.zh-CN.md)。CI 产物是开发版本，不是正式标签发布；GitHub 下载需登录。
+**没有安装 Python？** 可以从 [v0.1.0-rc.1 预发行](https://github.com/lin594/devwho/releases/tag/v0.1.0-rc.1)下载经过测试的 Go/Rust 产物，也可以安装 [Bash core](implementations/bash/README.zh-CN.md)。详见[下载、构建与实际依赖](implementations/README.zh-CN.md)。发行产物附统一 SHA256SUMS 和提交清单；CI 产物仍是开发构建，下载需登录 GitHub。
 
 ## 开始使用
 
-DevWho 目前处于早期 **v0.1** 阶段。源码已在 GitHub 提供，但目前没有正式发布的版本标签，也没有软件包仓库版本。如果你已经能运行 `devwho --version`，可以直接跳到第 2 步。
+DevWho 目前处于早期 **v0.1** 阶段。首个标签候选版本为 [v0.1.0-rc.1](https://github.com/lin594/devwho/releases/tag/v0.1.0-rc.1)，暂未发布到软件包仓库。如果你已经能运行 `devwho --version`，可以直接跳到第 2 步。
 
 ### 1. 安装一次
 
@@ -78,12 +78,12 @@ git clone https://github.com/lin594/devwho.git
 cd devwho
 python3 scripts/build_zipapp.py
 mkdir -p "$HOME/.local/bin"
-install -m 755 dist/devwho-0.1.0.pyz "$HOME/.local/bin/devwho"
+install -m 755 dist/devwho-0.1.0rc1.pyz "$HOME/.local/bin/devwho"
 export PATH="$HOME/.local/bin:$PATH"
 devwho --version
 ```
 
-预期输出：`devwho 0.1.0`。这会为当前操作系统用户安装一个可执行文件，所有身份配置共用它。版本检查、pipx 备用安装方式，以及更新或卸载方法请见[入门指南](docs/zh-CN/getting-started.md)。
+预期输出：`devwho 0.1.0-rc.1`。这会为当前操作系统用户安装一个可执行文件，所有身份配置共用它。版本检查、pipx 备用安装方式，以及更新或卸载方法请见[入门指南](docs/zh-CN/getting-started.md)。
 
 ### 2. 保存身份配置
 

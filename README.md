@@ -61,11 +61,11 @@ Only this terminal and programs subsequently launched from it receive the change
 
 There are **no third-party Python dependencies at runtime**. The installation below uses your existing Python; pipx, Node.js, and Docker are not required. Windows PowerShell integration is planned; Windows users should use WSL for now.
 
-**No Python installed?** Choose a tested Go/Rust artifact from a successful [CI run](https://github.com/lin594/devwho/actions/workflows/ci.yml), or install the [Bash core](implementations/bash/README.md). See the [download/build instructions and actual dependencies](implementations/README.md). CI artifacts are development builds, not tagged releases; GitHub requires sign-in to download them.
+**No Python installed?** Choose a tested Go/Rust artifact from the [v0.1.0-rc.1 pre-release](https://github.com/lin594/devwho/releases/tag/v0.1.0-rc.1), or install the [Bash core](implementations/bash/README.md). See the [download/build instructions and actual dependencies](implementations/README.md). Release assets include a combined SHA256SUMS and commit manifest. CI artifacts remain development builds and require GitHub sign-in.
 
 ## Try it
 
-DevWho is an early **v0.1** project. Source is available on GitHub; there is no tagged release or package registry release yet. Already have `devwho --version` working? Continue with step 2.
+DevWho is an early **v0.1** project. The first tagged candidate is [v0.1.0-rc.1](https://github.com/lin594/devwho/releases/tag/v0.1.0-rc.1); package registry publication is deferred. Already have `devwho --version` working? Continue with step 2.
 
 ### 1. Install once
 
@@ -78,12 +78,12 @@ git clone https://github.com/lin594/devwho.git
 cd devwho
 python3 scripts/build_zipapp.py
 mkdir -p "$HOME/.local/bin"
-install -m 755 dist/devwho-0.1.0.pyz "$HOME/.local/bin/devwho"
+install -m 755 dist/devwho-0.1.0rc1.pyz "$HOME/.local/bin/devwho"
 export PATH="$HOME/.local/bin:$PATH"
 devwho --version
 ```
 
-Expected output: `devwho 0.1.0`. This installs one executable for your OS user, shared by all profiles. See [Getting started](docs/getting-started.md) for version checks, a pipx alternative, and updating or removing it.
+Expected output: `devwho 0.1.0-rc.1`. This installs one executable for your OS user, shared by all profiles. See [Getting started](docs/getting-started.md) for version checks, a pipx alternative, and updating or removing it.
 
 ### 2. Save your identities
 

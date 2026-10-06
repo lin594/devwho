@@ -41,7 +41,7 @@ jobs:
         run: |
           python -m build
           python scripts/build_zipapp.py
-          python dist/devwho-0.1.0.pyz --version
+          python dist/devwho-*.pyz --version
           python -m pip install --force-reinstall --no-deps dist/*.whl
           cd "$RUNNER_TEMP"
           devwho --version
