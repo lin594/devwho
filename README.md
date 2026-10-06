@@ -1,204 +1,151 @@
 # DevWho
 
-**Per-shell developer identity through environment variables.**
+**Switch developer identities in your terminal. Keep your projects where they are.**
 
-[Project](https://github.com/lin594/devwho) · [Source](https://github.com/lin594/devwho) · [Issues](https://github.com/lin594/devwho/issues) · [CI workflow](https://github.com/lin594/devwho/actions/workflows/ci.yml)
+[English](README.md) | [简体中文](README.zh-CN.md)
 
-```bash
-# Terminal A
+[![CI](https://github.com/lin594/devwho/actions/workflows/ci.yml/badge.svg)](https://github.com/lin594/devwho/actions/workflows/ci.yml) · [MIT license](LICENSE) · [Documentation](docs/README.md) · [Get help](https://github.com/lin594/devwho/issues)
+
+DevWho is a small command-line tool for people who use more than one developer identity: personal and work accounts, client projects, or two people sharing a development machine. Save each identity once, then choose it for the terminal you are using.
+
+Your next Git commit uses the selected name and email. You can also choose a Git SSH key, a GitHub CLI account configuration, and other tools' environment settings. Your existing project folders and installed tools stay in place.
+
+## When is this useful?
+
+| Your situation | What DevWho helps you do |
+|---|---|
+| You use personal and work Git identities. | Switch before working, then check the name and email Git will use. |
+| Two people share one development machine. | Give a new terminal a default identity and make the other identity an explicit choice. |
+| You need different identities in two terminals. | Select each independently, even in the same project directory. |
+| A command needs a particular tool configuration. | Run it with a profile while keeping the parent terminal as it was. |
+
+If Git's directory-based `includeIf` already solves your problem, you may not need DevWho. It is most useful when identity depends on **who is using this terminal**, rather than where a repository lives. [Compare approaches →](docs/alternatives.md)
+
+## What daily use looks like
+
+After the one-time setup below, `work` and `personal` are names you choose for saved identities:
+
+```sh
 setdev work
+git config user.email
+# jane.work@example.test
 
-# Terminal B
 setdev personal
+git config user.email
+# jane.personal@example.test
 
-# Give one command and its descendants a profile; leave the parent unchanged.
-devwho exec work -- codex
+unsetdev                 # Restore this terminal's identity from before switching
 ```
 
-Set your developer identity at the shell boundary. Tools launched from that shell inherit its environment. The same repository can be used with different profiles without moving folders or rewriting its saved configuration.
+Only this terminal and programs subsequently launched from it receive the change. Other terminals and already-running applications keep their own settings. Switching in a terminal does **not** switch an existing VS Code window, Copilot, or browser login.
 
-## Install
+## What you need
 
-Requires Python 3.11+, Git for Git identity, and Bash or Zsh. GitHub CLI and OpenSSH are needed only for their respective integrations. DevWho has no third-party runtime dependencies.
+| Requirement | When you need it |
+|---|---|
+| Linux, WSL, or macOS with Bash or Zsh | To use the terminal integration. Ubuntu/macOS and Python 3.11/3.13 run in [CI](https://github.com/lin594/devwho/actions/workflows/ci.yml); WSL is also checked locally. |
+| Python **3.11+** | To run DevWho, including its single-file version. |
+| Git **2.31+** | To follow this guide and switch Git identity. |
+| GitHub CLI (`gh`) | Optional: only for GitHub CLI account profiles and online identity checks. |
+| OpenSSH and an existing key | Optional: only for selecting a Git SSH key. |
 
-This is an unreleased source project. Clone the repository and install it with [pipx](https://pipx.pypa.io/):
+There are **no third-party Python dependencies at runtime**. The installation below uses your existing Python; pipx, Node.js, and Docker are not required. Windows PowerShell integration is planned; Windows users should use WSL for now.
 
-```bash
+## Try it
+
+DevWho is an early **v0.1** project. Source is available on GitHub; there is no tagged release or package registry release yet. Already have `devwho --version` working? Continue with step 2.
+
+### 1. Install once
+
+Run these commands in a Bash or Zsh terminal:
+
+```sh
 git clone https://github.com/lin594/devwho.git
 cd devwho
-pipx install .
-devwho --version
-```
-
-The project also provides a [GitHub Actions CI workflow](https://github.com/lin594/devwho/actions/workflows/ci.yml) for Ubuntu and macOS with Python 3.11 and 3.13. Check the workflow page for current run results; the configured matrix does not imply every job has passed.
-
-If pipx is unavailable, try the source checkout with existing Python:
-
-```bash
-export PATH="$PWD/bin:$PATH"
-devwho --version
-```
-
-An alternative single-file build is available without packaging dependencies:
-
-```bash
 python3 scripts/build_zipapp.py
-python3 dist/devwho-0.1.0.pyz --version
+mkdir -p "$HOME/.local/bin"
+install -m 755 dist/devwho-0.1.0.pyz "$HOME/.local/bin/devwho"
+export PATH="$HOME/.local/bin:$PATH"
+devwho --version
 ```
 
-The archive still needs Python 3.11+. To install this local build, copy the archive to a stable location on your PATH, such as `~/.local/bin/devwho`, and make it executable. Keep its `.pyz` suffix when invoking with Python directly; a copied executable named `devwho` is also supported.
+Expected output: `devwho 0.1.0`. This installs one executable for your OS user, shared by all profiles. See [Getting started](docs/getting-started.md) for version checks, a pipx alternative, and updating or removing it.
 
-Linux/WSL Bash and Zsh are tested locally. A Linux/macOS CI matrix is provided; macOS results must be confirmed before declaring macOS release support. Windows PowerShell and VS Code identity isolation are follow-up experimental work, outside this version's supported interface.
+### 2. Save your identities
 
-## Quick start
-
-```bash
+```sh
 devwho config init
-# Edit the file printed below: replace Jane's example names and emails.
 devwho config path
-
-# Choose ONE for the shell you are using:
-eval "$(devwho init bash)"
-# eval "$(devwho init zsh)"
-
-setdev work
-devwho current
-git var GIT_AUTHOR_IDENT
-git var GIT_COMMITTER_IDENT
-devwho doctor --offline
-
-unsetdev
-devwho current
 ```
 
-`config init` writes a small private template once and refuses to overwrite an existing file. Initialization defines shell functions and changes no startup files. To initialize future terminals, explicitly add the matching `eval` line to `.bashrc` or `.zshrc` after testing it in your current shell.
-
-For source use, the source `bin` directory must also be on PATH in future terminals; alternatively use an installed executable or the single-file archive.
-
-## Profiles
-
-Configuration lives at `$XDG_CONFIG_HOME/devwho/config.toml`, or `~/.config/devwho/config.toml`. `DEVWHO_CONFIG` or `devwho --config PATH ...` selects another file.
+Open the printed file in your text editor. Replace its contents with the example below, then replace Jane's names and emails with the identities you use. These are commit details, not passwords or GitHub usernames. You can name the profiles anything you like.
 
 ```toml
 version = 1
 
 [profiles.personal.git]
 name = "Jane Doe"
-email = "jane@example.com"
-
-[profiles.personal.env]
-TOOL_PROFILE = "personal"
+email = "jane.personal@example.test"
 
 [profiles.work.git]
 name = "Jane Doe"
-email = "jane@company.example"
-
-[profiles.work.env]
-TOOL_PROFILE = "work"
-NEW_TOOL_ACCOUNT = "work"
+email = "jane.work@example.test"
 ```
 
-`env` values are literal strings: `$HOME`, backticks and `$(...)` are not expanded. You can also use `unset_env = ["VARIABLE"]` at profile level. SSH key and GitHub config paths must be absolute, `~`, or start with `~/`; home-relative paths use the effective HOME after switching. Relative paths and `~other-user` are rejected. See [the runnable example](examples/config.toml).
+An existing configuration is kept: if `config init` says the file already exists, edit that file instead. Most users will find it at `~/.config/devwho/config.toml`.
 
-`show` displays identity metadata and custom variable names, with custom values hidden. Configuration is trusted local input: tools may interpret variables or explicit Git configuration as executable settings. DevWho quotes shell output; it does not sandbox those tools or isolate the shared OS account.
+### 3. Switch and check
 
-`current --verbose` displays effective Git author/committer metadata and the GitHub CLI configuration location. Use `doctor` to compare them with the profile and verify an actual GitHub login.
+Initialize **your current shell** using one of these lines:
 
-## Switch and restore
-
-`setdev PROFILE` affects the current shell and future descendants. Other terminals and already-running applications retain their environments.
-
-`unsetdev` restores the baseline captured before the first activation. Unset, empty and nonempty values are distinct. A → B → C → unset returns to the original baseline, rather than the previous profile. A variable dropped by a new profile is restored immediately. Subsequent user edits to that now-unmanaged variable are preserved.
-
-Shell state is held in a non-exported `__DEVWHO_STATE` variable. Children inherit the active environment, without inheriting the parent's restoration state. In an inherited shell, its inherited environment is its own baseline; initialization preserves its `DEVWHO_PROFILE` marker.
-
-Optional preferences make a shared machine convenient:
-
-```toml
-[settings]
-default_profile = "personal"
-shortcut_profile = "work"
-handoff_warning = true
+```sh
+eval "$(devwho init bash)"    # Bash
+# eval "$(devwho init zsh)"  # Zsh: use this line instead
 ```
 
-The default is applied on initialization of a fresh, inactive shell and becomes its baseline. Thus `setdev` selects `work`, while `unsetdev` returns to `personal`. Without these settings, initialization leaves identity unchanged and a profile name is required. `handoff_warning` is opt-in: it checks the current repository for uncommitted changes after switching, with a short timeout. It never assigns, stashes or removes those changes.
+Then try:
 
-When sharing one working copy, finish or explicitly hand over uncommitted changes and stop the previous person's editing tasks before taking over. Process environment isolation does not prevent simultaneous writes to one repository.
-
-## Child-process execution
-
-```bash
-devwho exec work -- git status
-devwho exec work -- bash
-devwho exec work -- codex --version
+```sh
+setdev work
+devwho current              # Prints: work
+git config user.email       # Prints the work email you saved
+devwho doctor --offline     # Checks the effective Git identity locally
+unsetdev
+devwho current              # Prints: none, in a fresh terminal with this example
 ```
 
-The command and its descendants get the selected profile. The parent environment stays unchanged. Existing variables absent from the profile remain inherited; exec is not an environment sandbox. On POSIX the command replaces the DevWho process, retaining normal signals and exit status. No executable or agent-specific login settings are managed by DevWho.
+`none` means no DevWho profile is selected; Git falls back to the settings that terminal had before switching. No commit or push is needed to try this.
 
-## Git behavior
+To make the commands available in future terminals, add the PATH and matching initialization lines to your shell startup file once. [Exact startup steps →](docs/getting-started.md#make-it-available-in-new-terminals)
 
-Git name/email compile into `GIT_CONFIG_COUNT` and indexed runtime settings for `user`, `author` and `committer`. They override config files, including stale repository identity fields; explicit Git `-c` options and explicit author controls retain Git's normal precedence. No `.gitconfig` or repository config is rewritten.
+## Everyday commands
 
-DevWho deliberately avoids long-lived `GIT_AUTHOR_*` and `GIT_COMMITTER_*`, so cherry-pick and rebase retain original authors. Nonempty inherited direct identity overrides cause activation to fail; their values are not printed or silently cleared.
+| I want to… | Command |
+|---|---|
+| See my saved identities | `devwho list` |
+| Switch this terminal | `setdev work` |
+| Check the current identity and Git details | `devwho current --verbose` |
+| Restore the original terminal settings | `unsetdev` |
+| Use a profile for one command | `devwho exec work -- git status` |
+| Check that my configured GitHub CLI login is correct | `devwho doctor` |
 
-Existing runtime pairs are preserved. Third-party pairs appended during activation survive switching and restoration. If the existing prefix or DevWho's managed block is changed, restoration fails rather than deleting unidentified configuration; reopen a fresh shell or undo the external edit. This conservative limit is intentional.
+For a shared computer, [set a default and a shortcut](docs/use-cases.md): a new terminal can start as `personal`, `setdev` can choose `work`, and `unsetdev` can return to `personal`.
 
-Basic signing settings `signing_key`, `signing_format` and `sign_commits` compile to Git runtime configuration. DevWho does not generate keys or prove a signature is trusted. For other runtime settings:
+## Does this also log me into GitHub?
 
-```toml
-[profiles.work.git.config]
-"commit.gpgSign" = "false"
-```
+Git **commit details**, **push credentials**, and the **GitHub CLI login** are separate. The example above selects commit details. To choose a GitHub CLI account or Git SSH key, follow [Accounts and authentication](docs/accounts.md). DevWho uses your existing credential tools; it does not create accounts or log in on your behalf.
 
-Values are strings or arrays of strings, preserving repeated config keys. Signing configured by itself does not require Git name/email.
+When two people share the same working copy, agree on how to hand over uncommitted work and stop the previous person's editing tasks. Selecting a profile does not separate their files or make simultaneous edits safe.
 
-## Git SSH
+## Where to go next
 
-```toml
-[profiles.work.git_ssh]
-identity_file = "~/.ssh/id_ed25519_work"
-identities_only = true
-```
+| Goal | Read |
+|---|---|
+| Complete setup, update, or uninstall | [Getting started](docs/getting-started.md) |
+| Personal/work accounts, shared computers, and one-off commands | [Everyday workflows](docs/use-cases.md) |
+| Reuse GitHub CLI logins or Git SSH keys | [Accounts and authentication](docs/accounts.md) |
+| Fix `command not found`, login mismatches, or restore errors | [Troubleshooting](docs/troubleshooting.md) |
+| Look up a command or TOML setting | [Reference](docs/reference.md) |
+| Report a bug or help improve DevWho | [Contributing](CONTRIBUTING.md) |
 
-The key must exist. DevWho safely quotes its path in `GIT_SSH_COMMAND`; Git fetch/pull/push inherit this command. It does not rewrite `~/.ssh/config`, create keys, manage agents, or select identity for standalone `ssh`. An existing separate agent can be selected through generic `SSH_AUTH_SOCK`.
-
-The local doctor checks the configured command/key, not remote SSH account ownership. Remote authentication remains a separate verification step.
-
-## GitHub CLI
-
-```toml
-[profiles.work.github]
-hostname = "github.com"
-expected_user = "jane-work"
-config_dir = "~/.config/devwho/github/work"
-```
-
-DevWho exports `GH_CONFIG_DIR` and `GH_HOST`. Perform the one-time login in each context with `devwho exec work -- gh auth login`. DevWho never copies or prints tokens. GitHub CLI manages its credentials. Nonempty `GH_TOKEN` or `GITHUB_TOKEN` conflicts with a GitHub profile and causes local activation to fail.
-
-Git commit identity, Git transport credentials, and GitHub CLI login are separate. A matching `gh` login does not prove Git HTTPS/GCM uses that account. Configure and verify the transport separately; ordinary profile activation does not rewrite remotes or automatically convert SSH to HTTPS.
-
-## Diagnose
-
-```bash
-devwho doctor
-devwho doctor work --offline
-```
-
-Doctor inspects the current environment against the requested profile; it does not switch it first. Git identities are checked through real Git. Configured GitHub identities are checked using `gh api user`. Mismatches include expected and actual account metadata. API failures are `UNVERIFIED`, never silently treated as success. `--offline` skips that request.
-
-Exit codes: `0` verified checks passed, `1` failure/mismatch, `2` required live verification unavailable or skipped. Exec retains the child exit code, with `127` for a missing command and `126` for a non-executable command. Activation and ordinary inspection are offline; network requests occur only in explicit live doctor checks. Optional handoff notices perform a local repository check.
-
-## Alternatives and limits
-
-[Alternatives](docs/alternatives.md) compares Git includeIf, profile switchers, `gh auth switch`, and direnv. Generic environment management already exists; DevWho packages explicit developer profiles, reversible shell switching, scoped execution and consumer verification into a small interface.
-
-No daemon, directory auto-switching, GUI, secret store, remote guard or editor extension is part of v0.1. Those belong to optional follow-up work. See [architecture](docs/architecture.md), [migration from existing Git and GitHub CLI settings](docs/migration.md), and [project status](docs/current-state.md).
-
-## Develop
-
-```bash
-PYTHONPATH=src python3 -m unittest discover -s tests -v
-python3 scripts/build_zipapp.py
-```
-
-Tests use isolated temporary HOME/config/repositories, real Bash/Zsh and real Git, without using your credentials. [CONTRIBUTING.md](CONTRIBUTING.md) describes formatting, linting and packaging checks. See [SECURITY.md](SECURITY.md) for reporting security issues.
+More: [documentation index](docs/README.md) · [changes](CHANGELOG.md) · [security reports](SECURITY.md) · [MIT license](LICENSE)

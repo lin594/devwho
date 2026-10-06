@@ -10,7 +10,7 @@ Generic env is first-class and literal. Git name/email, basic signing configurat
 
 ## Local acceptance evidence
 
-- The unified unittest suite passes locally. One Zsh-only string-attribute test is intentionally skipped under Bash, not because a supported shell is missing. Run the commands in CONTRIBUTING.md for the current count and results.
+- The unified unittest suite passes locally. One Zsh-only string-attribute test is intentionally skipped under Bash, not because a supported shell is missing. Run the commands in [CONTRIBUTING.md](../CONTRIBUTING.md) for the current count and results.
 - Real independent Bash/Zsh processes remain alive while the other profile changes.
 - Missing, empty and nonempty baselines restore; different key sets, idempotence and child inheritance are covered.
 - Actual Git commits override stale local names; nonempty cherry-pick and rebase preserve original authors and select the current committer.
@@ -38,7 +38,7 @@ Source/examples use fictional identities. Local design notes, profiles and backu
 
 ## Alternatives
 
-[Comparison](docs/alternatives.md) uses current primary documentation for Git includeIf, git-profile, git-persona, gitch, DevSwitch, gh, direnv and git-context. Environment management substantially overlaps with direnv; DevWho's contribution is the explicit profile/restore/exec/doctor developer interface. No verified evidence in that bounded review establishes a mature identical contract. Some latest-release endpoints could not be retrieved, and no maintenance claims are invented.
+[Comparison](alternatives.md) uses current primary documentation for Git includeIf, git-profile, git-persona, gitch, DevSwitch, gh, direnv and git-context. Environment management substantially overlaps with direnv; DevWho's contribution is the explicit profile/restore/exec/doctor developer interface. No verified evidence in that bounded review establishes a mature identical contract. Some latest-release endpoints could not be retrieved, and no maintenance claims are invented.
 
 ## Limits and release decisions
 
@@ -47,7 +47,7 @@ Source/examples use fictional identities. Local design notes, profiles and backu
 - Runtime prefix/managed-block changes during activation make restoration fail conservatively; tail appendages are supported.
 - Inherited shells restore their inherited baseline; they do not know a parent's earlier baseline.
 - No directory auto-switching, daemon, GUI, remote identity guard, previous-profile stack or secret-provider integration is included.
-- The project uses MIT licensing. Private vulnerability reports use the entry point in SECURITY.md.
+- The project uses MIT licensing. Private vulnerability reports use the entry point in [SECURITY.md](../SECURITY.md).
 - No release tag, hosted release or package registry publication is included in the source push.
 
 The shell/process model has local v0.1 acceptance coverage. Confirm hosted CI and transport authentication separately before relying on an additional platform or live account setup.

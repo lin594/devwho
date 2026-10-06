@@ -1,5 +1,7 @@
 # Changelog
 
+[简体中文](CHANGELOG.zh-CN.md)
+
 ## 0.1.0 — Unreleased
 
 - Environment-first TOML profiles with literal generic env and explicit unsets.
@@ -11,5 +13,6 @@
 - Fixed SSH/GitHub semantic paths to stay independent of working-directory changes and resolve against the target profile's effective HOME.
 - Effective Git identity in `current --verbose` and checksums covering all generated distributions.
 - Compatible shell activation argument parsing on Python 3.11.
+- Added a Chinese version of the contributing guide, security policy, and changelog.
 
 PowerShell and VS Code identity integration are deferred experiments. No release tag or package registry publication is provided yet.
